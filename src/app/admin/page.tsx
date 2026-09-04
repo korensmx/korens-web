@@ -34,6 +34,7 @@ import {
   Clock,
   Radio,
   Facebook,
+  Youtube,
 } from "lucide-react";
 import { Lead, Product, BlogPost, BlogComment, Review, SiteContent, DiagnosticSubmission, GoogleIntegration, SocialFeedPost, FacebookPost, FacebookIntegration } from "@/lib/types";
 
@@ -824,13 +825,13 @@ export default function AdminDashboardPage() {
             onClick={() => setActiveTab("social")}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
               activeTab === "social"
-                ? "bg-blue-600 text-white shadow-lg shadow-blue-950"
+                ? "bg-red-600 text-white shadow-lg shadow-red-950"
                 : "text-slate-400 hover:text-white hover:bg-slate-800"
             }`}
           >
-            <Facebook className="w-4 h-4 text-blue-400" />
-            <span>Sincronización Facebook ({facebookPosts.length || 5} Posts)</span>
-            <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
+            <Youtube className="w-4 h-4 text-red-400 fill-red-400" />
+            <span>Canal YouTube (@KorensMX)</span>
+            <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse" />
           </button>
 
           <button
@@ -1826,24 +1827,21 @@ export default function AdminDashboardPage() {
         )}
 
         {/* ========================================================================= */}
-        {/* PESTAÑA: GESTOR DE FEED SOCIAL (INSTAGRAM & FACEBOOK) */}
-        {/* ========================================================================= */}
-        {/* ========================================================================= */}
-        {/* PESTAÑA: SINCRONIZACIÓN FACEBOOK (5 PUBLICACIONES)                       */}
+        {/* PESTAÑA: CANAL DE YOUTUBE (@KorensMX)                                     */}
         {/* ========================================================================= */}
         {activeTab === "social" && (
           <div className="py-6 space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs font-bold mb-2">
-                  <Facebook className="w-3.5 h-3.5" />
-                  <span>Sincronización Oficial Facebook Graph & Web</span>
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-bold mb-2">
+                  <Youtube className="w-3.5 h-3.5 fill-red-500" />
+                  <span>Canal Oficial de YouTube • @KorensMX</span>
                 </div>
                 <h3 className="text-xl font-black text-white">
-                  Módulo de Sincronización con Facebook (@korensmx)
+                  Gestión del Canal de YouTube & Contenido Audiovisual
                 </h3>
                 <p className="text-xs text-slate-400 mt-1 max-w-2xl">
-                  Sincroniza y administra las 5 publicaciones más recientes de tu página oficial de Facebook (https://www.facebook.com/korensmx). Cada publicación se muestra en el Feed Social con su texto completo e imagen de alta resolución.
+                  Tu sitio web presenta exclusivamente los videos oficiales de tu canal de YouTube (@KorensMX), con reproductor HD interactivo y enlaces directos de suscripción para tus clientes.
                 </p>
               </div>
 
@@ -1854,288 +1852,150 @@ export default function AdminDashboardPage() {
                   rel="noopener noreferrer"
                   className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold flex items-center gap-2 transition-colors cursor-pointer"
                 >
-                  <ExternalLink className="w-3.5 h-3.5 text-blue-400" />
-                  <span>Ver Feed en Web</span>
+                  <ExternalLink className="w-3.5 h-3.5 text-red-400" />
+                  <span>Ver Sección en Web</span>
                 </a>
 
-                <button
-                  type="button"
-                  onClick={handleSaveFacebookPosts}
-                  disabled={isSavingFb}
-                  className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center gap-2 transition-colors cursor-pointer shadow-lg shadow-blue-900/30 disabled:opacity-50"
+                <a
+                  href="https://www.youtube.com/@KorensMX?sub_confirmation=1"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold flex items-center gap-2 transition-colors cursor-pointer shadow-lg shadow-red-900/30"
                 >
-                  <Save className="w-3.5 h-3.5" />
-                  <span>{isSavingFb ? "Guardando..." : "Guardar Cambios"}</span>
-                </button>
+                  <Youtube className="w-3.5 h-3.5 fill-white" />
+                  <span>Enlace de Suscripción</span>
+                </a>
               </div>
             </div>
 
-            {/* Panel Principal de Control de Facebook */}
-            <div className="p-6 rounded-3xl bg-gradient-to-r from-blue-950/40 via-slate-900 to-blue-950/30 border border-blue-500/30 space-y-4">
+            {/* Panel Principal de Estado del Canal */}
+            <div className="p-6 rounded-3xl bg-gradient-to-r from-red-950/40 via-slate-900 to-red-950/30 border border-red-500/30 space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-blue-600 flex items-center justify-center text-white shrink-0 shadow-lg shadow-blue-600/30">
-                    <Facebook className="w-5 h-5" />
+                  <div className="w-10 h-10 rounded-2xl bg-red-600 flex items-center justify-center text-white shrink-0 shadow-lg shadow-red-600/30">
+                    <Youtube className="w-5 h-5 fill-white" />
                   </div>
                   <div>
                     <h4 className="text-sm font-bold text-white flex items-center gap-2">
-                      <span>Página Oficial: KORENS® (@korensmx)</span>
+                      <span>Canal Oficial: KORENS® (@KorensMX)</span>
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold border border-emerald-500/30">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                        Sincronizada
+                        Activo y Vinculado
                       </span>
                     </h4>
                     <span className="text-xs text-slate-400">
-                      Última sincronización:{" "}
-                      {facebookIntegration.lastSyncAt
-                        ? new Date(facebookIntegration.lastSyncAt).toLocaleString("es-MX")
-                        : "Hoy"}
+                      https://www.youtube.com/@KorensMX
                     </span>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2">
                   <a
-                    href={facebookIntegration.pageUrl || "https://www.facebook.com/korensmx"}
+                    href="https://www.youtube.com/@KorensMX"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center gap-1.5 border border-slate-700 transition-colors"
                   >
-                    <span>Abrir Facebook</span>
-                    <ExternalLink className="w-3 h-3 text-blue-400" />
+                    <span>Abrir Canal</span>
+                    <ExternalLink className="w-3 h-3 text-red-400" />
                   </a>
 
-                  <button
-                    type="button"
-                    onClick={handleSyncFacebook}
-                    disabled={isSyncingFb}
-                    className="px-4 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center gap-2 transition-all cursor-pointer shadow-md disabled:opacity-50"
+                  <a
+                    href="https://studio.youtube.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-4 py-1.5 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold flex items-center gap-2 transition-all cursor-pointer shadow-md"
                   >
-                    <RefreshCw className={`w-3.5 h-3.5 ${isSyncingFb ? "animate-spin" : ""}`} />
-                    <span>{isSyncingFb ? "Sincronizando..." : "Sincronizar Últimas 5 Publicaciones"}</span>
-                  </button>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    <span>YouTube Studio</span>
+                  </a>
                 </div>
               </div>
 
-              {/* URL de Facebook */}
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
-                <div className="md:col-span-8">
-                  <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">
-                    URL de la Página de Facebook
-                  </label>
-                  <input
-                    type="url"
-                    value={facebookIntegration.pageUrl}
-                    onChange={(e) =>
-                      setFacebookIntegration({ ...facebookIntegration, pageUrl: e.target.value })
-                    }
-                    placeholder="https://www.facebook.com/korensmx"
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 font-mono"
-                  />
+              {/* Información y Enlaces Rápidos */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800">
+                  <span className="text-[11px] text-slate-400 block mb-1">Videos en el Showcase</span>
+                  <span className="text-lg font-bold text-white font-mono">3 Videos HD</span>
                 </div>
-
-                <div className="md:col-span-4 flex items-end">
-                  <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 w-full flex items-center justify-between text-xs">
-                    <span className="text-slate-400">Total publicaciones en feed:</span>
-                    <span className="text-blue-400 font-bold font-mono">
-                      {facebookPosts.length || 5} / 5
-                    </span>
-                  </div>
+                <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800">
+                  <span className="text-[11px] text-slate-400 block mb-1">Reproductor</span>
+                  <span className="text-lg font-bold text-emerald-400">Modal Interactivo HD</span>
+                </div>
+                <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800">
+                  <span className="text-[11px] text-slate-400 block mb-1">Llamado a la Acción</span>
+                  <span className="text-lg font-bold text-red-400">Suscripción 1-Clic</span>
                 </div>
               </div>
-
-              {fbSyncMessage && (
-                <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/30 text-xs text-blue-300 flex items-center gap-2 animate-in fade-in">
-                  <CheckCheck className="w-4 h-4 text-blue-400 shrink-0" />
-                  <span>{fbSyncMessage}</span>
-                </div>
-              )}
             </div>
 
-            {/* Listado y Edición de las 5 Publicaciones de Facebook */}
+            {/* Listado de Videos Oficiales Activos en la Web */}
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h4 className="text-sm font-bold text-white flex items-center gap-2">
-                    <Facebook className="w-4 h-4 text-blue-400" />
-                    <span>Las 5 Publicaciones de Facebook Sincronizadas (Texto e Imagen)</span>
-                  </h4>
-                  <p className="text-xs text-slate-400 mt-0.5">
-                    Cada publicación cuenta con su texto e imagen correspondiente que se muestran en vivo en el sitio web.
-                  </p>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={handleSaveFacebookPosts}
-                  disabled={isSavingFb}
-                  className="btn-orange-glow text-white text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-2 cursor-pointer shadow-lg disabled:opacity-50"
-                >
-                  <Save className="w-3.5 h-3.5" />
-                  <span>{isSavingFb ? "Guardando..." : "Guardar las 5 Publicaciones"}</span>
-                </button>
+              <div>
+                <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                  <Youtube className="w-4 h-4 text-red-500 fill-red-500" />
+                  <span>Videos Oficiales Activos en el Feed Web</span>
+                </h4>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Estos videos se reproducen en alta definición y sin anuncios molestos directamente en la página principal.
+                </p>
               </div>
 
-              <div className="space-y-4">
-                {(facebookPosts.length > 0 ? facebookPosts.slice(0, 5) : [1, 2, 3, 4, 5]).map((postItem, idx) => {
-                  const post = typeof postItem === "object" ? postItem : {
-                    id: `fb-post-${idx + 1}`,
-                    postUrl: "https://www.facebook.com/korensmx",
-                    imageUrl: "https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=1080&auto=format&fit=crop&q=80",
-                    text: "Publicación de Facebook de KORENS...",
-                    publishedAt: "Hace 1 día",
-                    likesCount: "150",
-                    commentsCount: "25",
-                    sharesCount: "15",
-                  };
-
-                  return (
-                    <div
-                      key={post.id || idx}
-                      className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4 hover:border-slate-700 transition-colors"
-                    >
-                      {/* Header de la Publicación */}
-                      <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-                        <div className="flex items-center gap-2">
-                          <span className="w-6 h-6 rounded-lg bg-blue-600/20 border border-blue-500/30 text-blue-400 font-black text-xs flex items-center justify-center">
-                            #{idx + 1}
-                          </span>
-                          <span className="text-xs font-bold text-white">
-                            Publicación {idx + 1} de 5
-                          </span>
-                          <span className="text-[11px] text-slate-400">• {post.publishedAt || "Publicación Oficial"}</span>
-                        </div>
-
-                        <a
-                          href={post.postUrl || "https://www.facebook.com/korensmx"}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-[11px] text-blue-400 hover:underline flex items-center gap-1 font-semibold"
-                        >
-                          <span>Ver en Facebook</span>
-                          <ExternalLink className="w-3 h-3" />
-                        </a>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {[
+                  {
+                    id: "5T7t66GWzlo",
+                    title: "KORENS: Catálogo y Servicios | Estrategia y Empleabilidad de Alto Nivel 💼🚀",
+                    type: "Video Hero Destacado",
+                    tag: "Catálogo Oficial",
+                    thumb: "https://i.ytimg.com/vi/5T7t66GWzlo/hqdefault.jpg",
+                  },
+                  {
+                    id: "TdwocX8uSD0",
+                    title: "La nueva regla de oro para conseguir empleo en México hoy 📈",
+                    type: "Masterclass",
+                    tag: "Estrategia 2026",
+                    thumb: "https://i.ytimg.com/vi/TdwocX8uSD0/hqdefault.jpg",
+                  },
+                  {
+                    id: "rlTk4OiYlAE",
+                    title: "¿Mandas tu CV y nadie te llama? Descubre el error de los filtros ATS",
+                    type: "Short Destacado",
+                    tag: "Filtros ATS",
+                    thumb: "https://i.ytimg.com/vi/rlTk4OiYlAE/hqdefault.jpg",
+                  },
+                ].map((v, i) => (
+                  <div
+                    key={v.id}
+                    className="p-4 rounded-2xl bg-slate-900 border border-slate-800 hover:border-red-500/40 transition-colors flex flex-col justify-between space-y-3"
+                  >
+                    <div className="space-y-2">
+                      <div className="relative aspect-video rounded-xl overflow-hidden bg-slate-950 border border-slate-800">
+                        <img src={v.thumb} alt={v.title} className="w-full h-full object-cover" />
+                        <span className="absolute top-2 left-2 bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                          {v.tag}
+                        </span>
+                        <span className="absolute bottom-2 right-2 bg-black/80 text-slate-300 text-[10px] font-mono px-1.5 py-0.5 rounded">
+                          #{i + 1}
+                        </span>
                       </div>
-
-                      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-                        {/* Columna 1: Vista previa de Imagen y URL */}
-                        <div className="lg:col-span-4 space-y-2">
-                          <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                            Imagen de la Publicación
-                          </label>
-                          <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-slate-950 border border-slate-800">
-                            <img
-                              src={post.imageUrl}
-                              alt={`Publicación ${idx + 1}`}
-                              className="w-full h-full object-cover"
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).src =
-                                  "https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=1080&auto=format&fit=crop&q=80";
-                              }}
-                            />
-                            <span className="absolute top-2 left-2 bg-black/70 px-2 py-0.5 rounded text-[10px] text-white">
-                              Post #{idx + 1}
-                            </span>
-                          </div>
-
-                          <input
-                            type="text"
-                            value={post.imageUrl}
-                            onChange={(e) =>
-                              handleUpdateFacebookPostField(idx, "imageUrl", e.target.value)
-                            }
-                            placeholder="URL de la imagen (https://...)"
-                            className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-[11px] text-white placeholder-slate-500 font-mono"
-                          />
-                        </div>
-
-                        {/* Columna 2: Texto de la Publicación y Datos */}
-                        <div className="lg:col-span-8 space-y-3">
-                          <div>
-                            <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">
-                              Texto de la Publicación (Copy completo)
-                            </label>
-                            <textarea
-                              rows={4}
-                              value={post.text}
-                              onChange={(e) =>
-                                handleUpdateFacebookPostField(idx, "text", e.target.value)
-                              }
-                              placeholder="Escribe o edita el texto de la publicación que se mostrará en el feed social..."
-                              className="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-xs text-white placeholder-slate-500 leading-relaxed focus:outline-none focus:border-blue-500 resize-y"
-                            />
-                          </div>
-
-                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                            <div>
-                              <label className="block text-[10px] text-slate-400 mb-1">Link al post en FB</label>
-                              <input
-                                type="url"
-                                value={post.postUrl}
-                                onChange={(e) =>
-                                  handleUpdateFacebookPostField(idx, "postUrl", e.target.value)
-                                }
-                                placeholder="https://www.facebook.com/korensmx/..."
-                                className="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder-slate-600 font-mono text-[11px]"
-                              />
-                            </div>
-
-                            <div>
-                              <label className="block text-[10px] text-slate-400 mb-1">Fecha / Antigüedad</label>
-                              <input
-                                type="text"
-                                value={post.publishedAt}
-                                onChange={(e) =>
-                                  handleUpdateFacebookPostField(idx, "publishedAt", e.target.value)
-                                }
-                                placeholder="Hace 1 día"
-                                className="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-white"
-                              />
-                            </div>
-
-                            <div className="flex items-center gap-2">
-                              <div className="w-1/2">
-                                <label className="block text-[10px] text-slate-400 mb-1">Reacciones</label>
-                                <input
-                                  type="text"
-                                  value={post.likesCount || "150"}
-                                  onChange={(e) =>
-                                    handleUpdateFacebookPostField(idx, "likesCount", e.target.value)
-                                  }
-                                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-white text-center"
-                                />
-                              </div>
-                              <div className="w-1/2">
-                                <label className="block text-[10px] text-slate-400 mb-1">Comentarios</label>
-                                <input
-                                  type="text"
-                                  value={post.commentsCount || "25"}
-                                  onChange={(e) =>
-                                    handleUpdateFacebookPostField(idx, "commentsCount", e.target.value)
-                                  }
-                                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-white text-center"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+                      <h5 className="text-xs font-bold text-white line-clamp-2">{v.title}</h5>
+                      <span className="text-[11px] text-slate-400 font-mono block">ID: {v.id}</span>
                     </div>
-                  );
-                })}
-              </div>
 
-              {/* Botón Final de Guardado */}
-              <div className="pt-4 flex justify-end">
-                <button
-                  type="button"
-                  onClick={handleSaveFacebookPosts}
-                  disabled={isSavingFb}
-                  className="btn-orange-glow text-white text-xs font-bold px-8 py-3 rounded-xl flex items-center gap-2 cursor-pointer shadow-xl disabled:opacity-50"
-                >
-                  <Save className="w-4 h-4" />
-                  <span>{isSavingFb ? "Guardando..." : "Guardar Cambios en las 5 Publicaciones"}</span>
-                </button>
+                    <div className="flex items-center gap-2 pt-2 border-t border-slate-800">
+                      <a
+                        href={`https://www.youtube.com/watch?v=${v.id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full text-center py-2 px-3 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
+                      >
+                        <ExternalLink className="w-3 h-3 text-red-400" />
+                        <span>Ver en YouTube</span>
+                      </a>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>

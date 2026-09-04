@@ -25,7 +25,7 @@ export default function Header({ onOpenDiagnostic }: HeaderProps) {
     { name: "Método", href: "#metodo" },
     { name: "Paquetes", href: "#paquetes" },
     { name: "Servicios Individuales", href: "#servicios" },
-    { name: "Feed Social", href: "#social" },
+    { name: "Canal YouTube", href: "#social" },
     { name: "Blog", href: "#blog" },
     { name: "Testimonios", href: "#testimonios" },
     { name: "Consultor", href: "#consultor" },

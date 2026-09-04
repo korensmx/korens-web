@@ -146,7 +146,7 @@ export default function Footer() {
               </li>
               <li>
                 <a href="#social" className="hover:text-white transition-colors">
-                  Feed Social Multimedia
+                  Canal YouTube (@KorensMX)
                 </a>
               </li>
               <li>
