@@ -1,0 +1,331 @@
+{
+  "adminPasswordHash": "korens2025",
+  "siteContent": {
+    "heroTitle": "Tu experiencia vale más cuando el mercado puede verla.",
+    "heroSubtitle": "Transformamos talento invisible en una propuesta profesional clara, competitiva y lista para abrir conversaciones con las empresas correctas.",
+    "whatsappNumber": "525659993957",
+    "contactEmail": "contacto@korens.mx",
+    "diagnosticWhatsAppText": "Hola KORENS, quiero solicitar mi diagnóstico de empleabilidad y recibir asesoría sobre mis opciones de carrera.",
+    "announcementText": "🔥 Promoción especial de temporada: hasta 50% de descuento en paquetes ejecutivos.",
+    "showAnnouncement": true,
+    "socialLinks": {
+      "whatsapp": "https://wa.me/525659993957",
+      "linkedin": "https://www.linkedin.com/company/korens/",
+      "youtube": "https://www.youtube.com/@KorensMX",
+      "instagram": "https://www.instagram.com/korensmx",
+      "facebook": "https://www.facebook.com/korensmx/",
+      "tiktok": "https://www.tiktok.com/@korensmx",
+      "x": "https://x.com/Korens_MX"
+    }
+  },
+  "products": [
+    {
+      "id": "pkg-plata",
+      "name": "Paquete Plata",
+      "category": "package",
+      "realPrice": 713,
+      "offerPrice": 499,
+      "discountPercent": 30,
+      "badge": "-30% AHORRO",
+      "isPopular": false,
+      "deliveryFormat": "Entrega en 48 - 72 hrs hábiles",
+      "description": "Básico - Ideal para recién egresados y profesionistas que inician su trayectoria y requieren un despegue formal en el mercado laboral.",
+      "features": [
+        "Diseño y redacción profesional de CV por competencias (formato ATS Friendly)",
+        "Creación y optimización estratégica de perfil profesional en OCCMundial",
+        "Estructuración de logros medibles y palabras clave de la industria",
+        "Archivos finales en formato PDF editable y Word de alta resolución",
+        "Garantía de revisión y ajustes durante los primeros 7 días"
+      ],
+      "mercadoPagoUrl": "https://mpago.la/pos/korens-plata"
+    },
+    {
+      "id": "pkg-oro",
+      "name": "Paquete Oro",
+      "category": "package",
+      "realPrice": 1332,
+      "offerPrice": 799,
+      "discountPercent": 40,
+      "badge": "MÁS POPULAR • -40% AHORRO",
+      "isPopular": true,
+      "deliveryFormat": "Entrega en 72 hrs hábiles",
+      "description": "Intermedio - Diseñado para profesionistas en búsqueda activa que buscan multiplicar sus entrevistas y proyectar una marca personal sólida.",
+      "features": [
+        "Diseño y redacción profesional de CV por competencias con enfoque en impacto",
+        "Creación y optimización profunda en 3 plataformas: LinkedIn, OCCMundial e Indeed",
+        "Banner ejecutivo y redacción de titular estratégico para LinkedIn",
+        "Guía metodológica KORENS con recomendaciones clave para entrevistas",
+        "Auditoría de compatibilidad de palabras clave con algoritmos de reclutamiento",
+        "Soporte prioritario por WhatsApp durante el proceso"
+      ],
+      "mercadoPagoUrl": "https://mpago.la/pos/korens-oro"
+    },
+    {
+      "id": "pkg-platinum",
+      "name": "Paquete Platinum",
+      "category": "package",
+      "realPrice": 1798,
+      "offerPrice": 899,
+      "discountPercent": 50,
+      "badge": "MÁXIMO IMPACTO • -50% AHORRO",
+      "isPopular": false,
+      "deliveryFormat": "Entrega express prioritaria",
+      "description": "Premium - Exclusivo para perfiles gerenciales, directivos y especialistas senior listos para dar el salto a posiciones de alto rango salarial.",
+      "features": [
+        "Diseño y redacción ejecutiva de CV con métricas de ROI y liderazgo de equipos",
+        "Creación y optimización en 4 plataformas: LinkedIn, OCCMundial, Indeed y Computrabajo",
+        "Carta de presentación ejecutiva estandarizada (Cover Letter) de alto impacto",
+        "Posicionamiento de marca personal directiva y networking estratégico",
+        "Estrategia de palabras clave para pasar filtros de robots ATS corporativos",
+        "Atención personalizada con consultor senior KORENS"
+      ],
+      "mercadoPagoUrl": "https://mpago.la/pos/korens-platinum"
+    },
+    {
+      "id": "srv-cv",
+      "name": "Elaboración / Optimización de 1 CV",
+      "category": "service",
+      "realPrice": 450,
+      "offerPrice": 300,
+      "discountPercent": 33,
+      "badge": "A LA CARTA",
+      "deliveryFormat": "Entrega digital PDF y DOCX",
+      "description": "Reestructuración integral de tu currículum vitae con redacción orientada a logros cuantificables y diseño contemporáneo. Sin incluir postulaciones.",
+      "features": [
+        "Redacción basada en logros y competencias clave",
+        "Formato compatible con sistemas de lectura ATS",
+        "Revisión profunda de ortografía, estilo y jerarquía",
+        "Formato editable en Word + PDF listo para imprimir o enviar"
+      ],
+      "mercadoPagoUrl": "https://mpago.la/pos/korens-srv-cv"
+    },
+    {
+      "id": "srv-plataforma",
+      "name": "Optimización de 1 Plataforma de Empleo",
+      "category": "service",
+      "realPrice": 400,
+      "offerPrice": 300,
+      "discountPercent": 25,
+      "badge": "A LA CARTA",
+      "deliveryFormat": "Configuración directa o guía paso a paso",
+      "description": "A elegir por el cliente: OCCMundial, LinkedIn, Indeed o Computrabajo. Configuramos tu perfil para maximizar apariciones en búsquedas de reclutadores.",
+      "features": [
+        "Selección de plataforma a elección (LinkedIn, OCC, Indeed o Computrabajo)",
+        "Titular profesional de alto impacto con palabras clave",
+        "Extracto / Acerca de mí que engancha al reclutador",
+        "Ajuste de preferencias de empleo para visibilidad inmediata"
+      ],
+      "mercadoPagoUrl": "https://mpago.la/pos/korens-srv-plataforma"
+    },
+    {
+      "id": "srv-cv-ingles",
+      "name": "Generación de CV en Idioma Inglés",
+      "category": "service",
+      "realPrice": 600,
+      "offerPrice": 400,
+      "discountPercent": 33,
+      "badge": "BILINGÜE",
+      "deliveryFormat": "Entrega digital PDF y DOCX",
+      "description": "Traducción profesional, adaptación cultural de terminología ejecutiva corporativa y redacción pulida en inglés técnico o de negocios.",
+      "features": [
+        "Terminología ejecutiva internacional adaptada a US/Global standards",
+        "Reemplazo de vocabulario básico por verbos de acción potentes",
+        "Revisión nativa de fluidez y concisión sintáctica",
+        "Formato editable bilingüe"
+      ],
+      "mercadoPagoUrl": "https://mpago.la/pos/korens-srv-cv-ingles"
+    },
+    {
+      "id": "srv-asesoria",
+      "name": "Asesoría sobre Plan de Carrera (45 min)",
+      "category": "service",
+      "realPrice": 650,
+      "offerPrice": 450,
+      "discountPercent": 31,
+      "badge": "1 A 1 EN VIVO",
+      "deliveryFormat": "Sesión en vivo vía Google Meet + reporte",
+      "description": "Sesión estratégica uno a uno con un consultor KORENS para destrabar tu crecimiento laboral, analizar bandas salariales y trazar un plan de acción concreto.",
+      "features": [
+        "45 minutos de mentoría personalizada en vivo vía Google Meet",
+        "Diagnóstico de tu situación laboral y metas a corto/mediano plazo",
+        "Definición de rango salarial competitivo para tu perfil",
+        "Reporte ejecutivo personalizado enviado por correo electrónico"
+      ],
+      "mercadoPagoUrl": "https://mpago.la/pos/korens-srv-asesoria"
+    },
+    {
+      "id": "srv-simulacion",
+      "name": "Simulación de Entrevista de Trabajo (45 min)",
+      "category": "service",
+      "realPrice": 700,
+      "offerPrice": 450,
+      "discountPercent": 36,
+      "badge": "ALTO RENDIMIENTO",
+      "deliveryFormat": "Sesión en vivo vía Google Meet + reporte",
+      "description": "Práctica intensiva de reclutamiento real con retroalimentación inmediata sobre tus fortalezas, lenguaje no verbal, respuestas a preguntas difíciles y áreas de oportunidad.",
+      "features": [
+        "Simulación realista de 45 minutos simulando al reclutador corporativo",
+        "Preguntas por competencias (metodología STAR / CAR)",
+        "Feedback inmediato sobre tono de voz, seguridad y contenido",
+        "Reporte escrito con plan de mejora enviado a tu correo"
+      ],
+      "mercadoPagoUrl": "https://mpago.la/pos/korens-srv-simulacion"
+    }
+  ],
+  "leads": [
+    {
+      "name": "Valeria Morales",
+      "email": "valeria.morales@test.com",
+      "whatsapp": "525598765432",
+      "productId": "pkg-oro",
+      "productTitle": "Paquete Oro",
+      "price": 799,
+      "notes": "En búsqueda activa",
+      "id": "lead-1788540588651-ecqem",
+      "status": "Iniciado",
+      "createdAt": "2026-09-04T16:49:48.651Z"
+    },
+    {
+      "id": "lead-seed-1",
+      "name": "Rodrigo Morales Garza",
+      "email": "rodrigo.morales@example.com",
+      "whatsapp": "525541928374",
+      "productId": "pkg-oro",
+      "productTitle": "Paquete Oro (Intermedio)",
+      "price": 799,
+      "status": "Iniciado",
+      "createdAt": "2026-09-02T14:20:00Z"
+    },
+    {
+      "id": "lead-seed-2",
+      "name": "Mariana Alatorre Santos",
+      "email": "m.alatorre@example.com",
+      "whatsapp": "528115667788",
+      "productId": "pkg-platinum",
+      "productTitle": "Paquete Platinum (Premium)",
+      "price": 899,
+      "status": "Contactado",
+      "createdAt": "2026-09-03T09:45:00Z"
+    }
+  ],
+  "blogPosts": [
+    {
+      "id": "post-1",
+      "slug": "por-que-tu-cv-no-pasa-filtros-ats",
+      "title": "Por qué tu CV no supera los filtros ATS y cómo corregirlo hoy mismo",
+      "category": "Estrategia de CV",
+      "excerpt": "Más del 75% de las postulaciones son descartadas automáticamente por sistemas de seguimiento de candidatos antes de que un humano las lea.",
+      "content": "Cuando envías tu currículum a través de plataformas como LinkedIn, OCCMundial o Indeed, rara vez llega de inmediato a la bandeja de un reclutador. En su lugar, pasa por un sistema conocido como ATS (Applicant Tracking System), diseñado para escanear, categorizar y clasificar candidatos según su coincidencia con la vacante.\n\n### El error de los diseños sobrecargados\nMuchos profesionistas utilizan plantillas de diseño con barras de porcentaje, múltiples columnas, tablas invisibles y gráficos llamativos. Si bien pueden lucir atractivos en pantalla, los lectores ópticos de los ATS se desorientan con estas estructuras, resultando en texto fragmentado o perfiles calificados con 0% de compatibilidad.\n\n### La clave: Redacción orientada a impacto y palabras clave\n1. **Titular conciso:** No pongas solo tu carrera universitaria; define tu función y especialidad (ej. \"Gerente de Operaciones Logísticas | Cadena de Suministro y ERP SAP\").\n2. **Metodología de logros:** En lugar de enumerar funciones cotidianas, estructura cada viñeta con la fórmula: Acción + Contexto + Métrica/Resultado cuantificable.\n3. **Jerarquía limpia:** Fuentes limpias estándar, fechas en orden cronológico inverso y encabezados inequívocos.\n\nEn KORENS reestructuramos tu trayectoria para que hable el lenguaje exacto que tanto los algoritmos como los directores de contratación buscan.",
+      "readTime": "4 min lectura",
+      "author": "Consultor Senior KORENS",
+      "date": "01 Sep 2026",
+      "coverImage": "https://images.unsplash.com/photo-1586281380349-632531db7ed4?auto=format&fit=crop&w=1200&q=80"
+    },
+    {
+      "id": "post-2",
+      "slug": "marca-personal-en-linkedin-mas-alla-de-buscar-empleo",
+      "title": "LinkedIn Estratégico: Cómo posicionarte para que las oportunidades te busquen a ti",
+      "category": "Marca Personal",
+      "excerpt": "Tener un perfil estático es como tener una tarjeta de presentación guardada en un cajón. Descubre cómo transformar tu presencia en un imán de reclutadores.",
+      "content": "La mayoría de las personas únicamente actualizan su LinkedIn cuando se quedan sin empleo o se sienten frustradas en su puesto actual. Ese es el peor momento para empezar a construir autoridad.\n\n### El algoritmo de búsqueda de LinkedIn\nLos reclutadores corporativos y 'headhunters' utilizan LinkedIn Recruiter para buscar palabras clave muy específicas en tres zonas críticas:\n1. El titular bajo tu nombre.\n2. La sección 'Acerca de' (primeras 3 líneas visibles en móviles).\n3. Las descripciones de experiencia de tus últimos dos cargos.\n\nSi estas secciones contienen descripciones genéricas como \"Profesional proactivo enfocado en resultados\", simplemente eres invisible en los filtros de búsqueda por competencias técnicas y directivas.\n\n### Los 3 elementos indispensables de un perfil magnético\n- **Banner personalizado:** Comunica en una sola imagen tu sector, tu propuesta de valor y tu grado de sofisticación ejecutiva.\n- **Titular con propuesta de valor:** En lugar de \"En búsqueda de oportunidades\", utiliza tu especialidad funcional y las soluciones que generas.\n- **Narrativa de logros:** Redacta el resumen en primera persona, mostrando no solo qué haces, sino cómo piensas y qué problemas resuelves a las empresas.",
+      "readTime": "5 min lectura",
+      "author": "Equipo Editorial KORENS",
+      "date": "28 Ago 2026",
+      "coverImage": "https://images.unsplash.com/photo-1616469829941-c7200edec809?auto=format&fit=crop&w=1200&q=80"
+    },
+    {
+      "id": "post-3",
+      "slug": "como-negociar-tu-sueldo-sin-temor-a-perder-la-oferta",
+      "title": "Estrategias tácticas para negociar un incremento salarial del 25% al 40%",
+      "category": "Negociación & Entrevistas",
+      "excerpt": "Aprende el momento exacto para hablar de números y la fórmula psicológica para anclar ofertas en la parte alta de la banda presupuestal.",
+      "content": "Negociar el salario es uno de los momentos de mayor tensión en un proceso de selección. Muchos profesionistas aceptan la primera cifra por miedo a que la empresa retire la propuesta o los considere 'complicados'.\n\n### La regla de oro: No des tu cifra primero\nCuando el reclutador pregunta \"¿Cuáles son tus pretensiones económicas?\", responder con un número exacto limita tu techo de negociación. La mejor respuesta devuelve amablemente la pregunta:\n*\"Me gustaría entender primero el alcance completo de las responsabilidades, los retos de la posición y el paquete integral de compensaciones para evaluar una propuesta justa. ¿Cuál es el rango salarial presupuestado para esta posición?\"*\n\n### Respaldar el valor con evidencia\nLa negociación salarial nunca debe basarse en tus gastos personales (\"tengo que pagar una hipoteca\"), sino en el retorno de inversión y el riesgo que estás mitigando para la organización. Cuando KORENS te prepara en simulación de entrevista, aprendes a anclar tus logros con seguridad inquebrantable.",
+      "readTime": "6 min lectura",
+      "author": "Consultor Senior KORENS",
+      "date": "20 Ago 2026",
+      "coverImage": "https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=1200&q=80"
+    }
+  ],
+  "comments": [
+    {
+      "postId": "post-1",
+      "authorName": "Diana Morales",
+      "authorEmail": "diana.m@example.com",
+      "content": "Increíble artículo, desconocía por completo cómo funcionan los sistemas ATS. Me pondré en contacto para optimizar mi CV.",
+      "id": "comm-1788540670901",
+      "status": "approved",
+      "createdAt": "2026-09-04T16:51:10.901Z"
+    },
+    {
+      "id": "comment-1",
+      "postId": "post-1",
+      "authorName": "Carlos Mendoza",
+      "authorEmail": "carlos.mendoza@gmail.com",
+      "content": "Excelente artículo. Apliqué el cambio del titular y las viñetas por logros y esta semana recibí dos llamadas de reclutadores.",
+      "status": "approved",
+      "createdAt": "2026-09-02T16:30:00Z"
+    },
+    {
+      "id": "comment-2",
+      "postId": "post-2",
+      "authorName": "Gabriela Valdés",
+      "authorEmail": "gaby.valdes@outlook.com",
+      "content": "Totalmente de acuerdo con el tema del banner y las palabras clave. Muchas gracias por compartir información tan clara.",
+      "status": "approved",
+      "createdAt": "2026-09-03T11:15:00Z"
+    }
+  ],
+  "reviews": [
+    {
+      "clientName": "Lic. Fernando Castro",
+      "role": "Director Comercial",
+      "company": "Retail Corporativo",
+      "rating": 5,
+      "comment": "El servicio superó todas mis expectativas. En 3 semanas pasé de no tener respuestas a recibir 4 ofertas.",
+      "id": "rev-1788540661606",
+      "status": "approved",
+      "createdAt": "2026-09-04T16:51:01.606Z"
+    },
+    {
+      "id": "rev-1",
+      "clientName": "Ing. Alejandro Villarreal",
+      "role": "Gerente de Planta & Operaciones",
+      "company": "Sector Automotriz",
+      "rating": 5,
+      "comment": "Llevaba más de 6 meses enviando currículums sin recibir respuestas para puestos de gerencia. Con el Paquete Platinum de KORENS, reestructuraron completamente mi perfil con métricas reales. En menos de un mes conseguí 3 entrevistas finales y cerré una oferta con un 35% de incremento salarial. Totalmente recomendados.",
+      "status": "approved",
+      "createdAt": "2026-08-25T18:00:00Z"
+    },
+    {
+      "id": "rev-2",
+      "clientName": "Lic. Andrea Morales",
+      "role": "Coordinadora de Talento y Cultura",
+      "company": "Consultoría de RH",
+      "rating": 5,
+      "comment": "Incluso dedicándome a Recursos Humanos, me costaba mucho trabajo sintetizar mi propia experiencia y valor. La asesoría 1 a 1 y la optimización de LinkedIn que hicieron en KORENS superó mis expectativas por mucho. El trato es impecable y la claridad que te dan no tiene precio.",
+      "status": "approved",
+      "createdAt": "2026-08-28T14:30:00Z"
+    },
+    {
+      "id": "rev-3",
+      "clientName": "Mtro. Javier Saldaña",
+      "role": "Director Financiero (CFO)",
+      "company": "Sector Fintech",
+      "rating": 5,
+      "comment": "El nivel de sofisticación en la redacción y en la simulación de entrevista es extraordinario. Te enseñan a defender tu valor sin rodeos y a formular preguntas de alto impacto al consejo directivo. El retorno sobre la inversión fue inmediato.",
+      "status": "approved",
+      "createdAt": "2026-09-01T10:00:00Z"
+    },
+    {
+      "id": "rev-4",
+      "clientName": "Dra. Sofía Domínguez",
+      "role": "Líder de Asuntos Regulatorios",
+      "company": "Industria Farmacéutica",
+      "rating": 5,
+      "comment": "El CV en inglés que me desarrollaron y la preparación previa me abrieron las puertas en una multinacional extranjera con esquema 100% remoto en dólares. El Paquete Oro cubrió absolutamente todo lo que necesitaba.",
+      "status": "approved",
+      "createdAt": "2026-09-02T19:20:00Z"
+    }
+  ],
+  "diagnostics": []
+}
