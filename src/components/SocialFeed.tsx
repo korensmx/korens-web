@@ -13,33 +13,34 @@ import {
 } from "lucide-react";
 
 export default function SocialFeed() {
-  const [activeVideoId, setActiveVideoId] = useState<string>("5T7t66GWzlo");
+  const [activeVideoId, setActiveVideoId] = useState<string>("rlTk4OiYlAE");
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [currentVideoTitle, setCurrentVideoTitle] = useState("");
 
   const youtubeChannelUrl = "https://www.youtube.com/@KorensMX";
   const subscribeUrl = "https://www.youtube.com/@KorensMX?sub_confirmation=1";
 
+  // Ordenados cronológicamente: Del más reciente al más antiguo
   const youtubeVideos = [
     {
       id: "v1",
-      youtubeId: "5T7t66GWzlo",
-      title: "KORENS: Catálogo y Servicios | Estrategia y Empleabilidad de Alto Nivel 💼🚀",
-      description: "Conoce a fondo nuestra metodología, los paquetes Plata, Oro y Platinum, y cómo transformamos perfiles profesionales en candidatos de alto impacto.",
-      views: "Video Oficial",
-      duration: "Catálogo",
-      thumbnail: "https://i.ytimg.com/vi/5T7t66GWzlo/maxresdefault.jpg",
-      fallbackThumbnail: "https://i.ytimg.com/vi/5T7t66GWzlo/hqdefault.jpg",
-      tag: "Catálogo Oficial",
-      badgeColor: "bg-korens-orange",
+      youtubeId: "rlTk4OiYlAE",
+      title: "¿Mandas tu CV y nadie te llama? Descubre el error de los filtros ATS",
+      description: "Aprende por qué los lectores automáticos de ATS descartan más del 70% de los currículums y la fórmula exacta para superarlos con éxito.",
+      views: "Publicado: 2 Sep 2026",
+      duration: "0:59",
+      thumbnail: "https://i.ytimg.com/vi/rlTk4OiYlAE/maxresdefault.jpg",
+      fallbackThumbnail: "https://i.ytimg.com/vi/rlTk4OiYlAE/hqdefault.jpg",
+      tag: "Más Reciente • Filtros ATS",
+      badgeColor: "bg-red-600",
     },
     {
       id: "v2",
       youtubeId: "TdwocX8uSD0",
       title: "La nueva regla de oro para conseguir empleo en México hoy 📈",
       description: "Estrategias prácticas sobre el mercado oculto de vacantes, posicionamiento en LinkedIn y cómo destacar frente a directores de talento humano.",
-      views: "Estrategia Laboral",
-      duration: "Recomendado",
+      views: "Publicado: 20 Ago 2026",
+      duration: "Estrategia",
       thumbnail: "https://i.ytimg.com/vi/TdwocX8uSD0/maxresdefault.jpg",
       fallbackThumbnail: "https://i.ytimg.com/vi/TdwocX8uSD0/hqdefault.jpg",
       tag: "Estrategia 2026",
@@ -47,15 +48,15 @@ export default function SocialFeed() {
     },
     {
       id: "v3",
-      youtubeId: "rlTk4OiYlAE",
-      title: "¿Mandas tu CV y nadie te llama? Descubre el error de los filtros ATS",
-      description: "Aprende por qué los lectores automáticos de ATS descartan más del 70% de los currículums y la fórmula exacta para superarlos con éxito.",
-      views: "Short Destacado",
-      duration: "0:59",
-      thumbnail: "https://i.ytimg.com/vi/rlTk4OiYlAE/maxresdefault.jpg",
-      fallbackThumbnail: "https://i.ytimg.com/vi/rlTk4OiYlAE/hqdefault.jpg",
-      tag: "Filtros ATS",
-      badgeColor: "bg-red-600",
+      youtubeId: "5T7t66GWzlo",
+      title: "KORENS: Catálogo y Servicios | Estrategia y Empleabilidad de Alto Nivel 💼🚀",
+      description: "Conoce a fondo nuestra metodología, los paquetes Plata, Oro y Platinum, y cómo transformamos perfiles profesionales en candidatos de alto impacto.",
+      views: "Publicado: 25 Jul 2026",
+      duration: "Catálogo",
+      thumbnail: "https://i.ytimg.com/vi/5T7t66GWzlo/maxresdefault.jpg",
+      fallbackThumbnail: "https://i.ytimg.com/vi/5T7t66GWzlo/hqdefault.jpg",
+      tag: "Catálogo Oficial",
+      badgeColor: "bg-korens-orange",
     },
   ];
 
@@ -136,7 +137,7 @@ export default function SocialFeed() {
 
                 <div className="absolute top-4 left-4 flex items-center gap-2">
                   <span className="px-3 py-1 rounded-full bg-red-600 text-white text-[11px] font-extrabold uppercase tracking-wider shadow-md">
-                    Video Destacado
+                    Último Video Publicado
                   </span>
                   <span className="px-2.5 py-1 rounded-full bg-black/80 text-slate-200 text-[11px] font-mono">
                     {youtubeVideos[0].duration}
@@ -156,7 +157,7 @@ export default function SocialFeed() {
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 text-xs font-bold text-korens-orange uppercase tracking-wider">
                     <Sparkles className="w-4 h-4" />
-                    <span>Catálogo & Servicios KORENS®</span>
+                    <span>{youtubeVideos[0].tag}</span>
                   </div>
 
                   <h3

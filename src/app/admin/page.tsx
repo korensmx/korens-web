@@ -1944,25 +1944,25 @@ export default function AdminDashboardPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {[
                   {
-                    id: "5T7t66GWzlo",
-                    title: "KORENS: Catálogo y Servicios | Estrategia y Empleabilidad de Alto Nivel 💼🚀",
-                    type: "Video Hero Destacado",
-                    tag: "Catálogo Oficial",
-                    thumb: "https://i.ytimg.com/vi/5T7t66GWzlo/hqdefault.jpg",
+                    id: "rlTk4OiYlAE",
+                    title: "¿Mandas tu CV y nadie te llama? Descubre el error de los filtros ATS",
+                    type: "Short Destacado (El Más Reciente)",
+                    tag: "2 Sep 2026 • Filtros ATS",
+                    thumb: "https://i.ytimg.com/vi/rlTk4OiYlAE/hqdefault.jpg",
                   },
                   {
                     id: "TdwocX8uSD0",
                     title: "La nueva regla de oro para conseguir empleo en México hoy 📈",
                     type: "Masterclass",
-                    tag: "Estrategia 2026",
+                    tag: "20 Ago 2026 • Estrategia",
                     thumb: "https://i.ytimg.com/vi/TdwocX8uSD0/hqdefault.jpg",
                   },
                   {
-                    id: "rlTk4OiYlAE",
-                    title: "¿Mandas tu CV y nadie te llama? Descubre el error de los filtros ATS",
-                    type: "Short Destacado",
-                    tag: "Filtros ATS",
-                    thumb: "https://i.ytimg.com/vi/rlTk4OiYlAE/hqdefault.jpg",
+                    id: "5T7t66GWzlo",
+                    title: "KORENS: Catálogo y Servicios | Estrategia y Empleabilidad de Alto Nivel 💼🚀",
+                    type: "Video de Catálogo (Fundacional)",
+                    tag: "25 Jul 2026 • Catálogo",
+                    thumb: "https://i.ytimg.com/vi/5T7t66GWzlo/hqdefault.jpg",
                   },
                 ].map((v, i) => (
                   <div
