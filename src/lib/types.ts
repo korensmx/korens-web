@@ -8,6 +8,10 @@ export interface Lead {
   price: number;
   status: "Iniciado" | "Contactado" | "Pagado" | "Cancelado";
   notes?: string;
+  scheduledDate?: string;
+  scheduledTime?: string;
+  meetLink?: string;
+  calendarUrl?: string;
   createdAt: string;
 }
 

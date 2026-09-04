@@ -24,6 +24,7 @@ import {
   RefreshCw,
   Sliders,
   Sparkles,
+  Video,
 } from "lucide-react";
 import { Lead, Product, BlogPost, BlogComment, Review, SiteContent, DiagnosticSubmission } from "@/lib/types";
 
@@ -144,7 +145,7 @@ export default function AdminDashboardPage() {
   };
 
   const exportLeadsCSV = () => {
-    const headers = ["ID", "Nombre", "Email", "WhatsApp", "Producto", "Precio", "Estatus", "Fecha"];
+    const headers = ["ID", "Nombre", "Email", "WhatsApp", "Producto", "Precio", "Cita Agendada", "Google Meet Link", "Estatus", "Fecha"];
     const rows = leads.map((l) => [
       l.id,
       `"${l.name}"`,
@@ -152,6 +153,8 @@ export default function AdminDashboardPage() {
       l.whatsapp,
       `"${l.productTitle}"`,
       l.price,
+      `"${l.scheduledDate ? `${l.scheduledDate} ${l.scheduledTime}` : 'Sin agendar'}"`,
+      `"${l.meetLink || ''}"`,
       l.status,
       new Date(l.createdAt).toLocaleString("es-MX"),
     ]);
@@ -574,7 +577,8 @@ export default function AdminDashboardPage() {
                     <th className="p-3.5">Contacto (WhatsApp & Email)</th>
                     <th className="p-3.5">Producto Solicitado</th>
                     <th className="p-3.5">Monto</th>
-                    <th className="p-3.5">Fecha</th>
+                    <th className="p-3.5">Cita Agendada (Google Meet)</th>
+                    <th className="p-3.5">Fecha Registro</th>
                     <th className="p-3.5">Estatus</th>
                     <th className="p-3.5 text-right">Acción</th>
                   </tr>
@@ -582,8 +586,11 @@ export default function AdminDashboardPage() {
                 <tbody className="divide-y divide-slate-800/80">
                   {leads.map((lead) => {
                     const cleanPhone = lead.whatsapp.replace(/\D/g, "");
+                    const appointmentDetails = lead.scheduledDate
+                      ? ` y tu sesión en Google Meet para el ${lead.scheduledDate} en el horario de ${lead.scheduledTime}`
+                      : "";
                     const waText = encodeURIComponent(
-                      `Hola ${lead.name}, te saludo de KORENS Consultoría Estratégica respecto a tu solicitud de ${lead.productTitle}. ¿Cómo te encuentras hoy?`
+                      `Hola ${lead.name}, te saludo de KORENS Consultoría Estratégica respecto a tu solicitud de ${lead.productTitle}${appointmentDetails}. ¿Cómo te encuentras hoy?`
                     );
                     const waLink = `https://wa.me/${cleanPhone}?text=${waText}`;
 
@@ -596,6 +603,31 @@ export default function AdminDashboardPage() {
                         </td>
                         <td className="p-3.5 font-semibold text-slate-200">{lead.productTitle}</td>
                         <td className="p-3.5 font-black text-korens-orange">${lead.price} MXN</td>
+                        <td className="p-3.5">
+                          {lead.scheduledDate ? (
+                            <div className="space-y-1">
+                              <span className="font-bold text-emerald-400 block">
+                                📅 {lead.scheduledDate}
+                              </span>
+                              <span className="text-slate-300 font-semibold block text-[11px]">
+                                ⏰ {lead.scheduledTime} (45 min)
+                              </span>
+                              {lead.meetLink && (
+                                <a
+                                  href={lead.meetLink}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1 text-[10px] text-cyan-400 hover:text-cyan-300 underline font-mono"
+                                >
+                                  <Video className="w-3 h-3" />
+                                  <span>Abrir Google Meet</span>
+                                </a>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-slate-500 italic text-[11px]">Sin cita agendada</span>
+                          )}
+                        </td>
                         <td className="p-3.5 text-slate-400">
                           {new Date(lead.createdAt).toLocaleDateString("es-MX", {
                             day: "2-digit",
@@ -703,8 +735,8 @@ export default function AdminDashboardPage() {
 
             {/* Modal de Edición de Producto */}
             {editingProduct && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in">
-                <div className="w-full max-w-lg bg-korens-card border border-slate-700 rounded-3xl p-6 sm:p-8 shadow-2xl">
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md animate-in fade-in">
+                <div className="w-full max-w-xl max-h-[92vh] overflow-y-auto bg-korens-card border border-slate-700 rounded-3xl p-6 sm:p-8 shadow-2xl">
                   <h3 className="text-lg font-bold text-white mb-1">Editar {editingProduct.name}</h3>
                   <p className="text-xs text-slate-400 mb-4">
                     Los cambios se reflejarán instantáneamente en la landing page.
@@ -782,13 +814,97 @@ export default function AdminDashboardPage() {
                         Descripción comercial
                       </label>
                       <textarea
-                        rows={3}
+                        rows={2}
                         value={editingProduct.description}
                         onChange={(e) =>
                           setEditingProduct({ ...editingProduct, description: e.target.value })
                         }
                         className="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-xs text-white"
                       />
+                    </div>
+
+                    {/* Badge y Formato de entrega */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-300 mb-1">
+                          Badge / Etiqueta Promocional
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="Ej. -30% AHORRO o MÁS POPULAR"
+                          value={editingProduct.badge || ""}
+                          onChange={(e) =>
+                            setEditingProduct({ ...editingProduct, badge: e.target.value })
+                          }
+                          className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-korens-orange"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-300 mb-1">
+                          Formato de Entrega (debajo de descripción)
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="Ej. Entrega en 48 - 72 hrs hábiles o Sesión Google Meet"
+                          value={editingProduct.deliveryFormat || ""}
+                          onChange={(e) =>
+                            setEditingProduct({ ...editingProduct, deliveryFormat: e.target.value })
+                          }
+                          className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-korens-orange"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Editor de Sección "Lo que incluye" (Viñetas de características) */}
+                    <div className="space-y-2 border-t border-slate-800 pt-3">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-bold text-white flex items-center gap-1.5">
+                          <span>Sección "Lo que incluye" ({editingProduct.features?.length || 0} puntos):</span>
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const current = editingProduct.features || [];
+                            setEditingProduct({
+                              ...editingProduct,
+                              features: [...current, "Nueva característica incluida"],
+                            });
+                          }}
+                          className="text-[11px] font-bold text-korens-orange hover:text-white px-2.5 py-1 rounded-lg bg-korens-orange/10 hover:bg-korens-orange/20 border border-korens-orange/30 flex items-center gap-1 transition-colors"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          <span>Agregar viñeta</span>
+                        </button>
+                      </div>
+
+                      <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                        {(editingProduct.features || []).map((feat, fIdx) => (
+                          <div key={fIdx} className="flex items-center gap-2">
+                            <input
+                              type="text"
+                              value={feat}
+                              onChange={(e) => {
+                                const updatedFeatures = [...(editingProduct.features || [])];
+                                updatedFeatures[fIdx] = e.target.value;
+                                setEditingProduct({ ...editingProduct, features: updatedFeatures });
+                              }}
+                              className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-korens-orange"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const updatedFeatures = (editingProduct.features || []).filter((_, i) => i !== fIdx);
+                                setEditingProduct({ ...editingProduct, features: updatedFeatures });
+                              }}
+                              className="p-2 rounded-xl text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 transition-colors"
+                              title="Eliminar viñeta"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
                     </div>
 
                     <div className="flex items-center justify-end gap-3 pt-2">

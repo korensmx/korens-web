@@ -14,7 +14,7 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { name, email, whatsapp, productId } = body;
+    const { name, email, whatsapp, productId, notes, scheduledDate, scheduledTime, meetLink, calendarUrl } = body;
 
     if (!name || !email || !whatsapp || !productId) {
       return NextResponse.json(
@@ -35,7 +35,11 @@ export async function POST(req: NextRequest) {
       productId,
       productTitle,
       price,
-      notes: body.notes || "",
+      notes: notes || "",
+      scheduledDate: scheduledDate || undefined,
+      scheduledTime: scheduledTime || undefined,
+      meetLink: meetLink || undefined,
+      calendarUrl: calendarUrl || undefined,
     });
 
     return NextResponse.json({

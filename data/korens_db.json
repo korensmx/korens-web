@@ -26,16 +26,16 @@
       "realPrice": 713,
       "offerPrice": 499,
       "discountPercent": 30,
-      "badge": "-30% AHORRO",
+      "badge": "OFERTA DESPEGUE -30%",
       "isPopular": false,
-      "deliveryFormat": "Entrega en 48 - 72 hrs hábiles",
+      "deliveryFormat": "Entrega express garantizada en 48 hrs",
       "description": "Básico - Ideal para recién egresados y profesionistas que inician su trayectoria y requieren un despegue formal en el mercado laboral.",
       "features": [
-        "Diseño y redacción profesional de CV por competencias (formato ATS Friendly)",
+        "Diseño y redacción profesional de CV por competencias (ATS Friendly)",
         "Creación y optimización estratégica de perfil profesional en OCCMundial",
-        "Estructuración de logros medibles y palabras clave de la industria",
-        "Archivos finales en formato PDF editable y Word de alta resolución",
-        "Garantía de revisión y ajustes durante los primeros 7 días"
+        "Estructuración de logros medibles y palabras clave",
+        "Archivos en PDF y Word editable",
+        "Garantía de satisfacción"
       ],
       "mercadoPagoUrl": "https://mpago.la/pos/korens-plata"
     },
@@ -173,6 +173,21 @@
     }
   ],
   "leads": [
+    {
+      "name": "Ing. Manuel Cordero",
+      "email": "m.cordero@empresa.com",
+      "whatsapp": "525512345678",
+      "productId": "pkg-platinum",
+      "productTitle": "Paquete Platinum",
+      "price": 899,
+      "notes": "",
+      "scheduledDate": "Lunes 7 de Septiembre",
+      "scheduledTime": "10:15 - 11:00",
+      "meetLink": "https://meet.google.com/kor-pla-man",
+      "id": "lead-1788544456019-5qvmv",
+      "status": "Iniciado",
+      "createdAt": "2026-09-04T17:54:16.019Z"
+    },
     {
       "name": "Valeria Morales",
       "email": "valeria.morales@test.com",
