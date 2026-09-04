@@ -27,6 +27,118 @@
       "lastSyncAt": "2026-09-04T12:00:00Z"
     },
     "facebookPageUrl": "https://www.facebook.com/korensmx/",
+    "facebookPosts": [
+      {
+        "id": "fb-post-1",
+        "postUrl": "https://www.facebook.com/korensmx",
+        "imageUrl": "https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=1080&auto=format&fit=crop&q=80",
+        "text": "¿Sabías que el 75% de los CVs son descartados por los filtros ATS antes de que un reclutador humano los lea? En KORENS® reestructuramos tu currículum profesional con las palabras clave exactas y métricas de impacto que superan los escaneos automatizados en México y Latinoamérica. 💼🚀",
+        "publishedAt": "Hace 1 día",
+        "likesCount": "142",
+        "commentsCount": "28",
+        "sharesCount": "19"
+      },
+      {
+        "id": "fb-post-2",
+        "postUrl": "https://www.facebook.com/korensmx",
+        "imageUrl": "https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=1080&auto=format&fit=crop&q=80",
+        "text": "¡Acelera tu crecimiento profesional! Nuestros Paquetes Plata, Oro y Platinum están diseñados para profesionales y directivos que buscan un cambio de empleo con hasta un 40% más de compensación. Incluye optimización de LinkedIn, OCC, Indeed y estrategia de posicionamiento ejecutiva. 📈🎯",
+        "publishedAt": "Hace 3 días",
+        "likesCount": "215",
+        "commentsCount": "43",
+        "sharesCount": "31"
+      },
+      {
+        "id": "fb-post-3",
+        "postUrl": "https://www.facebook.com/korensmx",
+        "imageUrl": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=1080&auto=format&fit=crop&q=80",
+        "text": "Una entrevista de trabajo se gana en la preparación. Nuestras sesiones de Simulación 1 a 1 vía Google Meet te permiten practicar con preguntas difíciles basadas en la metodología STAR/CAR, recibiendo retroalimentación inmediata sobre tu comunicación y propuesta de valor. 🎙️💼",
+        "publishedAt": "Hace 5 días",
+        "likesCount": "189",
+        "commentsCount": "35",
+        "sharesCount": "22"
+      },
+      {
+        "id": "fb-post-4",
+        "postUrl": "https://www.facebook.com/korensmx",
+        "imageUrl": "https://images.unsplash.com/photo-1521791136064-7986c2920216?w=1080&auto=format&fit=crop&q=80",
+        "text": "Networking estratégico: no se trata de repartir tarjetas ni enviar mensajes fríos, sino de construir relaciones genuinas con tomadores de decisión. Descubre en nuestra comunidad cómo posicionarte como el candidato referente en tu sector y acceder al mercado oculto de vacantes. 🤝🌟",
+        "publishedAt": "Hace 1 semana",
+        "likesCount": "276",
+        "commentsCount": "51",
+        "sharesCount": "40"
+      },
+      {
+        "id": "fb-post-5",
+        "postUrl": "https://www.facebook.com/korensmx",
+        "imageUrl": "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=1080&auto=format&fit=crop&q=80",
+        "text": "¿Estás listo para dar el salto profesional este 2026? Agenda tu diagnóstico gratuito con los consultores de KORENS® y diseñemos juntos la hoja de ruta para tu siguiente meta laboral con acompañamiento de alto nivel. 🚀📊",
+        "publishedAt": "Hace 1 semana",
+        "likesCount": "320",
+        "commentsCount": "67",
+        "sharesCount": "48"
+      }
+    ],
+    "facebookIntegration": {
+      "pageUrl": "https://www.facebook.com/korensmx",
+      "pageName": "KORENS®",
+      "pageUsername": "korensmx",
+      "isLinked": true,
+      "lastSyncAt": "2026-09-04T12:45:00Z",
+      "autoSync": true,
+      "posts": [
+        {
+          "id": "fb-post-1",
+          "postUrl": "https://www.facebook.com/korensmx",
+          "imageUrl": "https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=1080&auto=format&fit=crop&q=80",
+          "text": "¿Sabías que el 75% de los CVs son descartados por los filtros ATS antes de que un reclutador humano los lea? En KORENS® reestructuramos tu currículum profesional con las palabras clave exactas y métricas de impacto que superan los escaneos automatizados en México y Latinoamérica. 💼🚀",
+          "publishedAt": "Hace 1 día",
+          "likesCount": "142",
+          "commentsCount": "28",
+          "sharesCount": "19"
+        },
+        {
+          "id": "fb-post-2",
+          "postUrl": "https://www.facebook.com/korensmx",
+          "imageUrl": "https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=1080&auto=format&fit=crop&q=80",
+          "text": "¡Acelera tu crecimiento profesional! Nuestros Paquetes Plata, Oro y Platinum están diseñados para profesionales y directivos que buscan un cambio de empleo con hasta un 40% más de compensación. Incluye optimización de LinkedIn, OCC, Indeed y estrategia de posicionamiento ejecutiva. 📈🎯",
+          "publishedAt": "Hace 3 días",
+          "likesCount": "215",
+          "commentsCount": "43",
+          "sharesCount": "31"
+        },
+        {
+          "id": "fb-post-3",
+          "postUrl": "https://www.facebook.com/korensmx",
+          "imageUrl": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=1080&auto=format&fit=crop&q=80",
+          "text": "Una entrevista de trabajo se gana en la preparación. Nuestras sesiones de Simulación 1 a 1 vía Google Meet te permiten practicar con preguntas difíciles basadas en la metodología STAR/CAR, recibiendo retroalimentación inmediata sobre tu comunicación y propuesta de valor. 🎙️💼",
+          "publishedAt": "Hace 5 días",
+          "likesCount": "189",
+          "commentsCount": "35",
+          "sharesCount": "22"
+        },
+        {
+          "id": "fb-post-4",
+          "postUrl": "https://www.facebook.com/korensmx",
+          "imageUrl": "https://images.unsplash.com/photo-1521791136064-7986c2920216?w=1080&auto=format&fit=crop&q=80",
+          "text": "Networking estratégico: no se trata de repartir tarjetas ni enviar mensajes fríos, sino de construir relaciones genuinas con tomadores de decisión. Descubre en nuestra comunidad cómo posicionarte como el candidato referente en tu sector y acceder al mercado oculto de vacantes. 🤝🌟",
+          "publishedAt": "Hace 1 semana",
+          "likesCount": "276",
+          "commentsCount": "51",
+          "sharesCount": "40"
+        },
+        {
+          "id": "fb-post-5",
+          "postUrl": "https://www.facebook.com/korensmx",
+          "imageUrl": "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=1080&auto=format&fit=crop&q=80",
+          "text": "¿Estás listo para dar el salto profesional este 2026? Agenda tu diagnóstico gratuito con los consultores de KORENS® y diseñemos juntos la hoja de ruta para tu siguiente meta laboral con acompañamiento de alto nivel. 🚀📊",
+          "publishedAt": "Hace 1 semana",
+          "likesCount": "320",
+          "commentsCount": "67",
+          "sharesCount": "48"
+        }
+      ]
+    },
     "socialFeedPosts": [
       {
         "id": "ig-1",

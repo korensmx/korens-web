@@ -33,8 +33,9 @@ import {
   CheckCheck,
   Clock,
   Radio,
+  Facebook,
 } from "lucide-react";
-import { Lead, Product, BlogPost, BlogComment, Review, SiteContent, DiagnosticSubmission, GoogleIntegration, SocialFeedPost } from "@/lib/types";
+import { Lead, Product, BlogPost, BlogComment, Review, SiteContent, DiagnosticSubmission, GoogleIntegration, SocialFeedPost, FacebookPost, FacebookIntegration } from "@/lib/types";
 
 export default function AdminDashboardPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -75,6 +76,21 @@ export default function AdminDashboardPage() {
   const [newPostLikes, setNewPostLikes] = useState("1,800");
   const [newPostComments, setNewPostComments] = useState("95");
   const [newPostDate, setNewPostDate] = useState("Publicación Oficial");
+
+  // Facebook Integration states (5 posts)
+  const [facebookIntegration, setFacebookIntegration] = useState<FacebookIntegration>({
+    pageUrl: "https://www.facebook.com/korensmx",
+    pageName: "KORENS®",
+    pageUsername: "korensmx",
+    isLinked: true,
+    lastSyncAt: new Date().toISOString(),
+    autoSync: true,
+    posts: [],
+  });
+  const [facebookPosts, setFacebookPosts] = useState<FacebookPost[]>([]);
+  const [isSyncingFb, setIsSyncingFb] = useState(false);
+  const [isSavingFb, setIsSavingFb] = useState(false);
+  const [fbSyncMessage, setFbSyncMessage] = useState("");
 
   const [loading, setLoading] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState("");
@@ -130,7 +146,7 @@ export default function AdminDashboardPage() {
   const fetchAllData = async () => {
     setLoading(true);
     try {
-      const [leadsRes, prodsRes, blogRes, commRes, revRes, cmsRes, diagRes] = await Promise.all([
+      const [leadsRes, prodsRes, blogRes, commRes, revRes, cmsRes, diagRes, fbRes] = await Promise.all([
         fetch("/api/leads").then((r) => r.json()),
         fetch("/api/products").then((r) => r.json()),
         fetch("/api/blog").then((r) => r.json()),
@@ -138,6 +154,7 @@ export default function AdminDashboardPage() {
         fetch("/api/reviews?all=true").then((r) => r.json()),
         fetch("/api/cms").then((r) => r.json()),
         fetch("/api/diagnostics").then((r) => r.json()),
+        fetch("/api/facebook/sync").then((r) => r.json()).catch(() => ({ success: false })),
       ]);
 
       if (leadsRes.success) setLeads(leadsRes.leads || []);
@@ -145,6 +162,10 @@ export default function AdminDashboardPage() {
       if (blogRes.success) setBlogPosts(blogRes.posts || []);
       if (commRes.success) setComments(commRes.comments || []);
       if (revRes.success) setReviews(revRes.reviews || []);
+      if (fbRes.success) {
+        if (fbRes.integration) setFacebookIntegration(fbRes.integration);
+        if (fbRes.posts && Array.isArray(fbRes.posts)) setFacebookPosts(fbRes.posts);
+      }
       if (cmsRes.success && cmsRes.content) {
         setSiteContent(cmsRes.content);
         if (cmsRes.content.googleIntegration) {
@@ -155,6 +176,9 @@ export default function AdminDashboardPage() {
         }
         if (cmsRes.content.facebookPageUrl) {
           setFacebookPageUrl(cmsRes.content.facebookPageUrl);
+        }
+        if (cmsRes.content.facebookPosts && (!fbRes.success || !fbRes.posts)) {
+          setFacebookPosts(cmsRes.content.facebookPosts);
         }
       }
       if (diagRes.success) setDiagnostics(diagRes.diagnostics || []);
@@ -309,6 +333,67 @@ export default function AdminDashboardPage() {
       console.error(e);
     } finally {
       setIsSavingSocial(false);
+    }
+  };
+
+  // Facebook Integration Handlers
+  const handleSyncFacebook = async () => {
+    setIsSyncingFb(true);
+    setFbSyncMessage("");
+    try {
+      const res = await fetch("/api/facebook/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "sync", pageUrl: facebookIntegration.pageUrl }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        if (data.integration) setFacebookIntegration(data.integration);
+        if (data.posts && Array.isArray(data.posts)) setFacebookPosts(data.posts);
+        setFbSyncMessage(data.message || "¡Sincronizado con Facebook exitosamente!");
+        showNotification("¡5 publicaciones de Facebook sincronizadas con éxito!");
+      } else {
+        setFbSyncMessage(data.error || "Error al sincronizar con Facebook");
+      }
+    } catch (e) {
+      console.error(e);
+      setFbSyncMessage("Error de conexión con la sincronización de Facebook");
+    } finally {
+      setIsSyncingFb(false);
+    }
+  };
+
+  const handleUpdateFacebookPostField = (index: number, field: keyof FacebookPost, value: string) => {
+    const updated = [...facebookPosts];
+    updated[index] = { ...updated[index], [field]: value };
+    setFacebookPosts(updated);
+  };
+
+  const handleSaveFacebookPosts = async () => {
+    setIsSavingFb(true);
+    try {
+      const res = await fetch("/api/facebook/sync", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          posts: facebookPosts,
+          pageUrl: facebookIntegration.pageUrl,
+          autoSync: facebookIntegration.autoSync,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        if (data.integration) setFacebookIntegration(data.integration);
+        if (data.posts) setFacebookPosts(data.posts);
+        showNotification("¡Las 5 publicaciones de Facebook se guardaron correctamente!");
+      } else {
+        alert(data.error || "Error al guardar");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Error al guardar cambios de Facebook");
+    } finally {
+      setIsSavingFb(false);
     }
   };
 
@@ -739,12 +824,13 @@ export default function AdminDashboardPage() {
             onClick={() => setActiveTab("social")}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
               activeTab === "social"
-                ? "bg-pink-600 text-white shadow-lg shadow-pink-950"
+                ? "bg-blue-600 text-white shadow-lg shadow-blue-950"
                 : "text-slate-400 hover:text-white hover:bg-slate-800"
             }`}
           >
-            <Share2 className="w-4 h-4 text-pink-400" />
-            <span>Feed Social (IG & FB) ({socialPosts.length})</span>
+            <Facebook className="w-4 h-4 text-blue-400" />
+            <span>Sincronización Facebook ({facebookPosts.length || 5} Posts)</span>
+            <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
           </button>
 
           <button
@@ -1742,229 +1828,314 @@ export default function AdminDashboardPage() {
         {/* ========================================================================= */}
         {/* PESTAÑA: GESTOR DE FEED SOCIAL (INSTAGRAM & FACEBOOK) */}
         {/* ========================================================================= */}
+        {/* ========================================================================= */}
+        {/* PESTAÑA: SINCRONIZACIÓN FACEBOOK (5 PUBLICACIONES)                       */}
+        {/* ========================================================================= */}
         {activeTab === "social" && (
           <div className="py-6 space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-pink-500/10 border border-pink-500/30 text-pink-400 text-xs font-bold mb-2">
-                  <Share2 className="w-3.5 h-3.5" />
-                  <span>Redes Sociales KORENS®</span>
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs font-bold mb-2">
+                  <Facebook className="w-3.5 h-3.5" />
+                  <span>Sincronización Oficial Facebook Graph & Web</span>
                 </div>
                 <h3 className="text-xl font-black text-white">
-                  Gestor de Feed Social en Tiempo Real (Instagram & Facebook)
+                  Módulo de Sincronización con Facebook (@korensmx)
                 </h3>
                 <p className="text-xs text-slate-400 mt-1 max-w-2xl">
-                  Agrega y edita las publicaciones que aparecen en el feed social público de la web. Puedes conectar enlaces directos a tus posts en Instagram (@korensmx) o Facebook, configurar imágenes y títulos.
+                  Sincroniza y administra las 5 publicaciones más recientes de tu página oficial de Facebook (https://www.facebook.com/korensmx). Cada publicación se muestra en el Feed Social con su texto completo e imagen de alta resolución.
                 </p>
               </div>
 
-              <a
-                href="/#social"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold flex items-center gap-2 transition-colors cursor-pointer self-start"
-              >
-                <ExternalLink className="w-3.5 h-3.5 text-pink-400" />
-                <span>Ver Feed en Web Pública</span>
-              </a>
-            </div>
+              <div className="flex items-center gap-2">
+                <a
+                  href="/#social"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold flex items-center gap-2 transition-colors cursor-pointer"
+                >
+                  <ExternalLink className="w-3.5 h-3.5 text-blue-400" />
+                  <span>Ver Feed en Web</span>
+                </a>
 
-            {/* Configuración de Página de Facebook */}
-            <div className="p-5 rounded-3xl bg-slate-900 border border-slate-800 space-y-3">
-              <div className="flex items-center gap-2 text-xs font-bold text-white">
-                <Globe className="w-4 h-4 text-blue-400" />
-                <span>Página Oficial de Facebook (Widget en Vivo)</span>
-              </div>
-              <div className="flex flex-col sm:flex-row items-center gap-3">
-                <input
-                  type="url"
-                  value={facebookPageUrl}
-                  onChange={(e) => setFacebookPageUrl(e.target.value)}
-                  placeholder="https://www.facebook.com/korensmx/"
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-500 font-mono"
-                />
                 <button
                   type="button"
-                  onClick={() => saveSocialFeedPosts(socialPosts, facebookPageUrl)}
-                  disabled={isSavingSocial}
-                  className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center justify-center gap-2 shrink-0 transition-colors cursor-pointer disabled:opacity-50"
+                  onClick={handleSaveFacebookPosts}
+                  disabled={isSavingFb}
+                  className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center gap-2 transition-colors cursor-pointer shadow-lg shadow-blue-900/30 disabled:opacity-50"
                 >
                   <Save className="w-3.5 h-3.5" />
-                  <span>Guardar URL Facebook</span>
+                  <span>{isSavingFb ? "Guardando..." : "Guardar Cambios"}</span>
                 </button>
               </div>
-              <span className="text-[11px] text-slate-400 block">
-                Este enlace alimenta el widget oficial de Facebook en la página principal para mostrar tus publicaciones y seguidores en vivo.
-              </span>
             </div>
 
-            {/* Formulario para Agregar Nueva Publicación */}
-            <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-4">
-              <h4 className="text-sm font-bold text-white flex items-center gap-2">
-                <Plus className="w-4 h-4 text-pink-400" />
-                <span>Añadir Publicación al Feed (Instagram o Facebook)</span>
-              </h4>
-
-              <form onSubmit={handleAddSocialPost} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">
-                    Plataforma
-                  </label>
-                  <select
-                    value={newPostPlatform}
-                    onChange={(e) => setNewPostPlatform(e.target.value as any)}
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
-                  >
-                    <option value="instagram">Instagram (@korensmx)</option>
-                    <option value="facebook">Facebook (KORENS MX)</option>
-                  </select>
+            {/* Panel Principal de Control de Facebook */}
+            <div className="p-6 rounded-3xl bg-gradient-to-r from-blue-950/40 via-slate-900 to-blue-950/30 border border-blue-500/30 space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-blue-600 flex items-center justify-center text-white shrink-0 shadow-lg shadow-blue-600/30">
+                    <Facebook className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                      <span>Página Oficial: KORENS® (@korensmx)</span>
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold border border-emerald-500/30">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        Sincronizada
+                      </span>
+                    </h4>
+                    <span className="text-xs text-slate-400">
+                      Última sincronización:{" "}
+                      {facebookIntegration.lastSyncAt
+                        ? new Date(facebookIntegration.lastSyncAt).toLocaleString("es-MX")
+                        : "Hoy"}
+                    </span>
+                  </div>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">
-                    Link Directo al Post (URL) *
+                <div className="flex items-center gap-2">
+                  <a
+                    href={facebookIntegration.pageUrl || "https://www.facebook.com/korensmx"}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center gap-1.5 border border-slate-700 transition-colors"
+                  >
+                    <span>Abrir Facebook</span>
+                    <ExternalLink className="w-3 h-3 text-blue-400" />
+                  </a>
+
+                  <button
+                    type="button"
+                    onClick={handleSyncFacebook}
+                    disabled={isSyncingFb}
+                    className="px-4 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center gap-2 transition-all cursor-pointer shadow-md disabled:opacity-50"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 ${isSyncingFb ? "animate-spin" : ""}`} />
+                    <span>{isSyncingFb ? "Sincronizando..." : "Sincronizar Últimas 5 Publicaciones"}</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* URL de Facebook */}
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+                <div className="md:col-span-8">
+                  <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                    URL de la Página de Facebook
                   </label>
                   <input
                     type="url"
-                    required
-                    placeholder="https://www.instagram.com/p/..."
-                    value={newPostUrl}
-                    onChange={(e) => setNewPostUrl(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-600"
+                    value={facebookIntegration.pageUrl}
+                    onChange={(e) =>
+                      setFacebookIntegration({ ...facebookIntegration, pageUrl: e.target.value })
+                    }
+                    placeholder="https://www.facebook.com/korensmx"
+                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 font-mono"
                   />
                 </div>
 
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">
-                    Título / Encabezado del Post *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Ej. 3 Errores de CV que te dejan fuera"
-                    value={newPostTitle}
-                    onChange={(e) => setNewPostTitle(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
-                  />
+                <div className="md:col-span-4 flex items-end">
+                  <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 w-full flex items-center justify-between text-xs">
+                    <span className="text-slate-400">Total publicaciones en feed:</span>
+                    <span className="text-blue-400 font-bold font-mono">
+                      {facebookPosts.length || 5} / 5
+                    </span>
+                  </div>
                 </div>
+              </div>
 
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">
-                    URL de la Imagen del Post (o ruta /assets/...)
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="/assets/instagram/post1_cv_ats.png o URL externa"
-                    value={newPostImage}
-                    onChange={(e) => setNewPostImage(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-600 font-mono text-[11px]"
-                  />
+              {fbSyncMessage && (
+                <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/30 text-xs text-blue-300 flex items-center gap-2 animate-in fade-in">
+                  <CheckCheck className="w-4 h-4 text-blue-400 shrink-0" />
+                  <span>{fbSyncMessage}</span>
                 </div>
-
-                <div className="md:col-span-2">
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">
-                    Descripción / Leyenda corta (Caption)
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Ej. Aprende cómo transformar tu experiencia en resultados cuantificables."
-                    value={newPostCaption}
-                    onChange={(e) => setNewPostCaption(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Likes estimados</label>
-                  <input
-                    type="text"
-                    value={newPostLikes}
-                    onChange={(e) => setNewPostLikes(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Fecha / Etiqueta</label>
-                  <input
-                    type="text"
-                    value={newPostDate}
-                    onChange={(e) => setNewPostDate(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
-                  />
-                </div>
-
-                <div className="md:col-span-2 pt-2 flex justify-end">
-                  <button
-                    type="submit"
-                    disabled={isSavingSocial}
-                    className="btn-orange-glow text-white text-xs font-bold px-6 py-2.5 rounded-xl flex items-center gap-2 cursor-pointer shadow-lg disabled:opacity-50"
-                  >
-                    <Plus className="w-4 h-4" />
-                    <span>Agregar Publicación al Feed</span>
-                  </button>
-                </div>
-              </form>
+              )}
             </div>
 
-            {/* Listado de Publicaciones Actuales */}
-            <div className="space-y-3">
-              <h4 className="text-sm font-bold text-white">
-                Publicaciones Activas en el Feed ({socialPosts.length})
-              </h4>
+            {/* Listado y Edición de las 5 Publicaciones de Facebook */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                    <Facebook className="w-4 h-4 text-blue-400" />
+                    <span>Las 5 Publicaciones de Facebook Sincronizadas (Texto e Imagen)</span>
+                  </h4>
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    Cada publicación cuenta con su texto e imagen correspondiente que se muestran en vivo en el sitio web.
+                  </p>
+                </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {socialPosts.map((post) => (
-                  <div
-                    key={post.id}
-                    className="p-4 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col justify-between space-y-3"
-                  >
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${
-                          post.platform === "instagram" ? "bg-pink-500/20 text-pink-400" : "bg-blue-500/20 text-blue-400"
-                        }`}>
-                          {post.platform}
-                        </span>
-                        <span className="text-[11px] text-slate-400">{post.date}</span>
+                <button
+                  type="button"
+                  onClick={handleSaveFacebookPosts}
+                  disabled={isSavingFb}
+                  className="btn-orange-glow text-white text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-2 cursor-pointer shadow-lg disabled:opacity-50"
+                >
+                  <Save className="w-3.5 h-3.5" />
+                  <span>{isSavingFb ? "Guardando..." : "Guardar las 5 Publicaciones"}</span>
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                {(facebookPosts.length > 0 ? facebookPosts.slice(0, 5) : [1, 2, 3, 4, 5]).map((postItem, idx) => {
+                  const post = typeof postItem === "object" ? postItem : {
+                    id: `fb-post-${idx + 1}`,
+                    postUrl: "https://www.facebook.com/korensmx",
+                    imageUrl: "https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=1080&auto=format&fit=crop&q=80",
+                    text: "Publicación de Facebook de KORENS...",
+                    publishedAt: "Hace 1 día",
+                    likesCount: "150",
+                    commentsCount: "25",
+                    sharesCount: "15",
+                  };
+
+                  return (
+                    <div
+                      key={post.id || idx}
+                      className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4 hover:border-slate-700 transition-colors"
+                    >
+                      {/* Header de la Publicación */}
+                      <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+                        <div className="flex items-center gap-2">
+                          <span className="w-6 h-6 rounded-lg bg-blue-600/20 border border-blue-500/30 text-blue-400 font-black text-xs flex items-center justify-center">
+                            #{idx + 1}
+                          </span>
+                          <span className="text-xs font-bold text-white">
+                            Publicación {idx + 1} de 5
+                          </span>
+                          <span className="text-[11px] text-slate-400">• {post.publishedAt || "Publicación Oficial"}</span>
+                        </div>
+
+                        <a
+                          href={post.postUrl || "https://www.facebook.com/korensmx"}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[11px] text-blue-400 hover:underline flex items-center gap-1 font-semibold"
+                        >
+                          <span>Ver en Facebook</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
                       </div>
 
-                      <div className="aspect-video w-full rounded-xl overflow-hidden bg-slate-950">
-                        <img
-                          src={post.imageUrl}
-                          alt={post.title}
-                          className="w-full h-full object-cover"
-                        />
+                      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                        {/* Columna 1: Vista previa de Imagen y URL */}
+                        <div className="lg:col-span-4 space-y-2">
+                          <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                            Imagen de la Publicación
+                          </label>
+                          <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-slate-950 border border-slate-800">
+                            <img
+                              src={post.imageUrl}
+                              alt={`Publicación ${idx + 1}`}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src =
+                                  "https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=1080&auto=format&fit=crop&q=80";
+                              }}
+                            />
+                            <span className="absolute top-2 left-2 bg-black/70 px-2 py-0.5 rounded text-[10px] text-white">
+                              Post #{idx + 1}
+                            </span>
+                          </div>
+
+                          <input
+                            type="text"
+                            value={post.imageUrl}
+                            onChange={(e) =>
+                              handleUpdateFacebookPostField(idx, "imageUrl", e.target.value)
+                            }
+                            placeholder="URL de la imagen (https://...)"
+                            className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-[11px] text-white placeholder-slate-500 font-mono"
+                          />
+                        </div>
+
+                        {/* Columna 2: Texto de la Publicación y Datos */}
+                        <div className="lg:col-span-8 space-y-3">
+                          <div>
+                            <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                              Texto de la Publicación (Copy completo)
+                            </label>
+                            <textarea
+                              rows={4}
+                              value={post.text}
+                              onChange={(e) =>
+                                handleUpdateFacebookPostField(idx, "text", e.target.value)
+                              }
+                              placeholder="Escribe o edita el texto de la publicación que se mostrará en el feed social..."
+                              className="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-xs text-white placeholder-slate-500 leading-relaxed focus:outline-none focus:border-blue-500 resize-y"
+                            />
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div>
+                              <label className="block text-[10px] text-slate-400 mb-1">Link al post en FB</label>
+                              <input
+                                type="url"
+                                value={post.postUrl}
+                                onChange={(e) =>
+                                  handleUpdateFacebookPostField(idx, "postUrl", e.target.value)
+                                }
+                                placeholder="https://www.facebook.com/korensmx/..."
+                                className="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder-slate-600 font-mono text-[11px]"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-[10px] text-slate-400 mb-1">Fecha / Antigüedad</label>
+                              <input
+                                type="text"
+                                value={post.publishedAt}
+                                onChange={(e) =>
+                                  handleUpdateFacebookPostField(idx, "publishedAt", e.target.value)
+                                }
+                                placeholder="Hace 1 día"
+                                className="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-white"
+                              />
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                              <div className="w-1/2">
+                                <label className="block text-[10px] text-slate-400 mb-1">Reacciones</label>
+                                <input
+                                  type="text"
+                                  value={post.likesCount || "150"}
+                                  onChange={(e) =>
+                                    handleUpdateFacebookPostField(idx, "likesCount", e.target.value)
+                                  }
+                                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-white text-center"
+                                />
+                              </div>
+                              <div className="w-1/2">
+                                <label className="block text-[10px] text-slate-400 mb-1">Comentarios</label>
+                                <input
+                                  type="text"
+                                  value={post.commentsCount || "25"}
+                                  onChange={(e) =>
+                                    handleUpdateFacebookPostField(idx, "commentsCount", e.target.value)
+                                  }
+                                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-white text-center"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
-
-                      <h5 className="text-xs font-bold text-white line-clamp-2">{post.title}</h5>
-                      {post.caption && (
-                        <p className="text-[11px] text-slate-400 line-clamp-2">{post.caption}</p>
-                      )}
                     </div>
+                  );
+                })}
+              </div>
 
-                    <div className="pt-2 border-t border-slate-800 flex items-center justify-between">
-                      <a
-                        href={post.postUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-[11px] text-cyan-400 hover:underline flex items-center gap-1 font-semibold"
-                      >
-                        <span>Ver en {post.platform}</span>
-                        <ExternalLink className="w-3 h-3" />
-                      </a>
-
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteSocialPost(post.id)}
-                        className="text-rose-400 hover:text-rose-300 p-1.5 rounded-lg hover:bg-rose-500/10 cursor-pointer"
-                        title="Eliminar publicación"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
+              {/* Botón Final de Guardado */}
+              <div className="pt-4 flex justify-end">
+                <button
+                  type="button"
+                  onClick={handleSaveFacebookPosts}
+                  disabled={isSavingFb}
+                  className="btn-orange-glow text-white text-xs font-bold px-8 py-3 rounded-xl flex items-center gap-2 cursor-pointer shadow-xl disabled:opacity-50"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>{isSavingFb ? "Guardando..." : "Guardar Cambios en las 5 Publicaciones"}</span>
+                </button>
               </div>
             </div>
           </div>

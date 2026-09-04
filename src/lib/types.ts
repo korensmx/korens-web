@@ -76,6 +76,27 @@ export interface GoogleIntegration {
   clientSecret?: string;
 }
 
+export interface FacebookPost {
+  id: string;
+  postUrl: string;
+  imageUrl: string;
+  text: string;
+  publishedAt: string;
+  likesCount?: string;
+  commentsCount?: string;
+  sharesCount?: string;
+}
+
+export interface FacebookIntegration {
+  pageUrl: string;
+  pageName: string;
+  pageUsername: string;
+  isLinked: boolean;
+  lastSyncAt: string;
+  autoSync: boolean;
+  posts: FacebookPost[];
+}
+
 export interface SocialFeedPost {
   id: string;
   platform: "instagram" | "facebook";
@@ -95,6 +116,8 @@ export interface SiteContent {
   contactEmail: string;
   googleCalendarAccount?: string;
   googleIntegration?: GoogleIntegration;
+  facebookIntegration?: FacebookIntegration;
+  facebookPosts?: FacebookPost[];
   socialFeedPosts?: SocialFeedPost[];
   facebookPageUrl?: string;
   diagnosticWhatsAppText: string;
