@@ -26,14 +26,21 @@ import {
   Sparkles,
   Video,
   Calendar,
+  Share2,
+  Globe,
+  Link2,
+  Unlink,
+  CheckCheck,
+  Clock,
+  Radio,
 } from "lucide-react";
-import { Lead, Product, BlogPost, BlogComment, Review, SiteContent, DiagnosticSubmission } from "@/lib/types";
+import { Lead, Product, BlogPost, BlogComment, Review, SiteContent, DiagnosticSubmission, GoogleIntegration, SocialFeedPost } from "@/lib/types";
 
 export default function AdminDashboardPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [passwordInput, setPasswordInput] = useState("");
   const [authError, setAuthError] = useState("");
-  const [activeTab, setActiveTab] = useState<"leads" | "products" | "moderation" | "blog" | "cms" | "diagnostics">("leads");
+  const [activeTab, setActiveTab] = useState<"leads" | "products" | "google" | "social" | "moderation" | "blog" | "cms" | "diagnostics">("leads");
 
   // Data states
   const [leads, setLeads] = useState<Lead[]>([]);
@@ -43,6 +50,31 @@ export default function AdminDashboardPage() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [diagnostics, setDiagnostics] = useState<DiagnosticSubmission[]>([]);
   const [siteContent, setSiteContent] = useState<SiteContent | null>(null);
+
+  // Google Integration states
+  const [googleStatus, setGoogleStatus] = useState<GoogleIntegration>({
+    isLinked: true,
+    email: "korensmx@gmail.com",
+    autoSyncMeet: true,
+    autoSyncCalendar: true,
+    blockBusySlots: true,
+    lastSyncAt: new Date().toISOString(),
+  });
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [googleMessage, setGoogleMessage] = useState("");
+
+  // Social Feed states
+  const [socialPosts, setSocialPosts] = useState<SocialFeedPost[]>([]);
+  const [facebookPageUrl, setFacebookPageUrl] = useState("https://www.facebook.com/korensmx/");
+  const [isSavingSocial, setIsSavingSocial] = useState(false);
+  const [newPostPlatform, setNewPostPlatform] = useState<"instagram" | "facebook">("instagram");
+  const [newPostUrl, setNewPostUrl] = useState("");
+  const [newPostImage, setNewPostImage] = useState("");
+  const [newPostTitle, setNewPostTitle] = useState("");
+  const [newPostCaption, setNewPostCaption] = useState("");
+  const [newPostLikes, setNewPostLikes] = useState("1,800");
+  const [newPostComments, setNewPostComments] = useState("95");
+  const [newPostDate, setNewPostDate] = useState("Publicación Oficial");
 
   const [loading, setLoading] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState("");
@@ -113,7 +145,18 @@ export default function AdminDashboardPage() {
       if (blogRes.success) setBlogPosts(blogRes.posts || []);
       if (commRes.success) setComments(commRes.comments || []);
       if (revRes.success) setReviews(revRes.reviews || []);
-      if (cmsRes.success) setSiteContent(cmsRes.content || null);
+      if (cmsRes.success && cmsRes.content) {
+        setSiteContent(cmsRes.content);
+        if (cmsRes.content.googleIntegration) {
+          setGoogleStatus(cmsRes.content.googleIntegration);
+        }
+        if (cmsRes.content.socialFeedPosts) {
+          setSocialPosts(cmsRes.content.socialFeedPosts);
+        }
+        if (cmsRes.content.facebookPageUrl) {
+          setFacebookPageUrl(cmsRes.content.facebookPageUrl);
+        }
+      }
       if (diagRes.success) setDiagnostics(diagRes.diagnostics || []);
     } catch (err) {
       console.error(err);
@@ -125,6 +168,148 @@ export default function AdminDashboardPage() {
   const showNotification = (msg: string) => {
     setSaveSuccess(msg);
     setTimeout(() => setSaveSuccess(""), 4000);
+  };
+
+  // Google Integration Handlers
+  const handleLinkGoogle = async (targetEmail?: string) => {
+    setGoogleLoading(true);
+    setGoogleMessage("");
+    try {
+      const res = await fetch("/api/google/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "link", email: targetEmail || googleStatus.email || "korensmx@gmail.com" }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setGoogleStatus(data.integration);
+        setGoogleMessage(data.message);
+        showNotification("¡Cuenta de Google vinculada correctamente!");
+      }
+    } catch (e) {
+      setGoogleMessage("Error de conexión al vincular cuenta.");
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
+
+  const handleTestGoogleSync = async () => {
+    setGoogleLoading(true);
+    setGoogleMessage("");
+    try {
+      const res = await fetch("/api/google/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "test", email: googleStatus.email }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setGoogleStatus(data.integration);
+        setGoogleMessage(data.message);
+        showNotification("¡Prueba de sincronización con Google exitosa!");
+      }
+    } catch (e) {
+      setGoogleMessage("Error al probar sincronización.");
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
+
+  const handleSyncAllLeads = async () => {
+    setGoogleLoading(true);
+    setGoogleMessage("");
+    try {
+      const res = await fetch("/api/google/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "sync-all-leads", email: googleStatus.email }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setGoogleStatus(data.integration);
+        setGoogleMessage(data.message);
+        showNotification(data.message);
+      }
+    } catch (e) {
+      setGoogleMessage("Error al sincronizar citas en lote.");
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
+
+  const handleSaveGooglePreferences = async (updates: Partial<GoogleIntegration>) => {
+    const updated = { ...googleStatus, ...updates };
+    setGoogleStatus(updated);
+    try {
+      const res = await fetch("/api/google/sync", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updated),
+      });
+      const data = await res.json();
+      if (data.success) {
+        showNotification("Preferencias de Google guardadas");
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  // Social Feed Handlers
+  const handleAddSocialPost = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newPostTitle.trim() || !newPostUrl.trim()) {
+      alert("Por favor ingresa al menos el título y el link del post.");
+      return;
+    }
+    const newPost: SocialFeedPost = {
+      id: `post-${Date.now()}`,
+      platform: newPostPlatform,
+      postUrl: newPostUrl.trim(),
+      imageUrl: newPostImage.trim() || "/assets/instagram/post1_cv_ats.png",
+      title: newPostTitle.trim(),
+      caption: newPostCaption.trim(),
+      likes: newPostLikes.trim() || "1,800",
+      comments: newPostComments.trim() || "95",
+      date: newPostDate.trim() || "Publicación Oficial",
+    };
+    const updatedPosts = [newPost, ...socialPosts];
+    setSocialPosts(updatedPosts);
+    setNewPostUrl("");
+    setNewPostTitle("");
+    setNewPostCaption("");
+    setNewPostImage("");
+
+    await saveSocialFeedPosts(updatedPosts, facebookPageUrl);
+  };
+
+  const handleDeleteSocialPost = async (id: string) => {
+    if (!confirm("¿Eliminar esta publicación del feed social?")) return;
+    const updated = socialPosts.filter((p) => p.id !== id);
+    setSocialPosts(updated);
+    await saveSocialFeedPosts(updated, facebookPageUrl);
+  };
+
+  const saveSocialFeedPosts = async (posts: SocialFeedPost[], fbUrl: string) => {
+    setIsSavingSocial(true);
+    try {
+      const res = await fetch("/api/cms", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          socialFeedPosts: posts,
+          facebookPageUrl: fbUrl,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        showNotification("Feed social actualizado exitosamente en el sitio público");
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsSavingSocial(false);
+    }
   };
 
   // 1. Leads Actions
@@ -533,6 +718,33 @@ export default function AdminDashboardPage() {
           >
             <Sparkles className="w-4 h-4" />
             <span>Diagnósticos ({diagnostics.length})</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("google")}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+              activeTab === "google"
+                ? "bg-emerald-600 text-white shadow-lg shadow-emerald-950"
+                : "text-slate-400 hover:text-white hover:bg-slate-800"
+            }`}
+          >
+            <Calendar className="w-4 h-4 text-emerald-400" />
+            <span>Google Calendar & Meet</span>
+            {googleStatus.isLinked && (
+              <span className="w-2 h-2 rounded-full bg-emerald-400" />
+            )}
+          </button>
+
+          <button
+            onClick={() => setActiveTab("social")}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+              activeTab === "social"
+                ? "bg-pink-600 text-white shadow-lg shadow-pink-950"
+                : "text-slate-400 hover:text-white hover:bg-slate-800"
+            }`}
+          >
+            <Share2 className="w-4 h-4 text-pink-400" />
+            <span>Feed Social (IG & FB) ({socialPosts.length})</span>
           </button>
 
           <button
@@ -1351,6 +1563,410 @@ export default function AdminDashboardPage() {
                 </button>
               </div>
             </form>
+          </div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* PESTAÑA: VINCULACIÓN GOOGLE WORKSPACE (CALENDAR & MEET) */}
+        {/* ========================================================================= */}
+        {activeTab === "google" && (
+          <div className="py-6 space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold mb-2">
+                  <Calendar className="w-3.5 h-3.5" />
+                  <span>Google Workspace Integration</span>
+                </div>
+                <h3 className="text-xl font-black text-white">
+                  Vinculación de Cuenta Google (Calendar & Google Meet)
+                </h3>
+                <p className="text-xs text-slate-400 mt-1 max-w-2xl">
+                  Sincroniza automáticamente las sesiones 1 a 1 de 45 minutos reservadas por clientes en la web con tu agenda de Google Calendar y genera las salas privadas de Google Meet.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleTestGoogleSync}
+                disabled={googleLoading}
+                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold flex items-center gap-2 transition-colors cursor-pointer disabled:opacity-50 self-start"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 text-emerald-400 ${googleLoading ? "animate-spin" : ""}`} />
+                <span>Probar Sincronización</span>
+              </button>
+            </div>
+
+            {googleMessage && (
+              <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-medium flex items-center gap-2 animate-in fade-in">
+                <CheckCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>{googleMessage}</span>
+              </div>
+            )}
+
+            {/* Tarjeta Principal de Estado de Vinculación */}
+            <div className="p-6 rounded-3xl bg-slate-900/90 border-2 border-emerald-500/30 shadow-2xl space-y-6">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-800">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-2xl bg-white p-2.5 flex items-center justify-center shadow-lg shrink-0">
+                    {/* Logotipo oficial de Google */}
+                    <svg className="w-full h-full" viewBox="0 0 24 24">
+                      <path
+                        fill="#4285F4"
+                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                      />
+                      <path
+                        fill="#34A853"
+                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                      />
+                      <path
+                        fill="#FBBC05"
+                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                      />
+                      <path
+                        fill="#EA4335"
+                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                      />
+                    </svg>
+                  </div>
+
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-white text-base sm:text-lg">
+                        Cuenta Google Oficial: {googleStatus.email}
+                      </span>
+                      {googleStatus.isLinked && (
+                        <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-[10px] font-black uppercase tracking-wider">
+                          ● Vinculado y Activo
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-slate-400 mt-1">
+                      Todas las sesiones reservadas en la web invitan a <strong className="text-emerald-400">{googleStatus.email}</strong> y adjuntan la sala privada de Google Meet.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => handleLinkGoogle()}
+                    disabled={googleLoading}
+                    className="btn-orange-glow text-white text-xs font-bold px-5 py-2.5 rounded-xl flex items-center gap-2 shadow-lg cursor-pointer disabled:opacity-50"
+                  >
+                    <Link2 className="w-4 h-4" />
+                    <span>{googleStatus.isLinked ? "Reconectar / Actualizar Cuenta" : "Vincular Cuenta de Google"}</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Toggles de Sincronización Automática */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                      <Video className="w-4 h-4 text-emerald-400" />
+                      <span>Google Meet en Vivo</span>
+                    </span>
+                    <input
+                      type="checkbox"
+                      checked={googleStatus.autoSyncMeet}
+                      onChange={(e) => handleSaveGooglePreferences({ autoSyncMeet: e.target.checked })}
+                      className="w-4 h-4 accent-korens-orange rounded cursor-pointer"
+                    />
+                  </div>
+                  <p className="text-[11px] text-slate-400 leading-relaxed">
+                    Genera automáticamente una sala privada de videoconferencia para cada cita de 45 minutos.
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                      <Calendar className="w-4 h-4 text-korens-orange" />
+                      <span>Google Calendar Sync</span>
+                    </span>
+                    <input
+                      type="checkbox"
+                      checked={googleStatus.autoSyncCalendar}
+                      onChange={(e) => handleSaveGooglePreferences({ autoSyncCalendar: e.target.checked })}
+                      className="w-4 h-4 accent-korens-orange rounded cursor-pointer"
+                    />
+                  </div>
+                  <p className="text-[11px] text-slate-400 leading-relaxed">
+                    Envía invitaciones de calendario con recordatorios a korensmx@gmail.com y al candidato.
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                      <Clock className="w-4 h-4 text-amber-400" />
+                      <span>Buffer de 30 min</span>
+                    </span>
+                    <input
+                      type="checkbox"
+                      checked={googleStatus.blockBusySlots}
+                      onChange={(e) => handleSaveGooglePreferences({ blockBusySlots: e.target.checked })}
+                      className="w-4 h-4 accent-korens-orange rounded cursor-pointer"
+                    />
+                  </div>
+                  <p className="text-[11px] text-slate-400 leading-relaxed">
+                    Mantiene 30 minutos de descanso entre cada sesión ejecutiva para preparar reportes.
+                  </p>
+                </div>
+              </div>
+
+              {/* Botón de Sincronización Masiva de Leads */}
+              <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h4 className="text-xs font-bold text-white">Sincronizar Leads Agendados en Lote</h4>
+                  <p className="text-[11px] text-slate-400 mt-0.5">
+                    Hay {leads.filter((l) => !!l.scheduledDate).length} citas agendadas registradas en el sistema.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleSyncAllLeads}
+                  disabled={googleLoading}
+                  className="px-4 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-xs font-bold flex items-center gap-2 transition-colors cursor-pointer self-start sm:self-auto disabled:opacity-50"
+                >
+                  <Calendar className="w-3.5 h-3.5" />
+                  <span>Sincronizar Todas las Citas a Google Calendar</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* PESTAÑA: GESTOR DE FEED SOCIAL (INSTAGRAM & FACEBOOK) */}
+        {/* ========================================================================= */}
+        {activeTab === "social" && (
+          <div className="py-6 space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-pink-500/10 border border-pink-500/30 text-pink-400 text-xs font-bold mb-2">
+                  <Share2 className="w-3.5 h-3.5" />
+                  <span>Redes Sociales KORENS®</span>
+                </div>
+                <h3 className="text-xl font-black text-white">
+                  Gestor de Feed Social en Tiempo Real (Instagram & Facebook)
+                </h3>
+                <p className="text-xs text-slate-400 mt-1 max-w-2xl">
+                  Agrega y edita las publicaciones que aparecen en el feed social público de la web. Puedes conectar enlaces directos a tus posts en Instagram (@korensmx) o Facebook, configurar imágenes y títulos.
+                </p>
+              </div>
+
+              <a
+                href="/#social"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold flex items-center gap-2 transition-colors cursor-pointer self-start"
+              >
+                <ExternalLink className="w-3.5 h-3.5 text-pink-400" />
+                <span>Ver Feed en Web Pública</span>
+              </a>
+            </div>
+
+            {/* Configuración de Página de Facebook */}
+            <div className="p-5 rounded-3xl bg-slate-900 border border-slate-800 space-y-3">
+              <div className="flex items-center gap-2 text-xs font-bold text-white">
+                <Globe className="w-4 h-4 text-blue-400" />
+                <span>Página Oficial de Facebook (Widget en Vivo)</span>
+              </div>
+              <div className="flex flex-col sm:flex-row items-center gap-3">
+                <input
+                  type="url"
+                  value={facebookPageUrl}
+                  onChange={(e) => setFacebookPageUrl(e.target.value)}
+                  placeholder="https://www.facebook.com/korensmx/"
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-500 font-mono"
+                />
+                <button
+                  type="button"
+                  onClick={() => saveSocialFeedPosts(socialPosts, facebookPageUrl)}
+                  disabled={isSavingSocial}
+                  className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center justify-center gap-2 shrink-0 transition-colors cursor-pointer disabled:opacity-50"
+                >
+                  <Save className="w-3.5 h-3.5" />
+                  <span>Guardar URL Facebook</span>
+                </button>
+              </div>
+              <span className="text-[11px] text-slate-400 block">
+                Este enlace alimenta el widget oficial de Facebook en la página principal para mostrar tus publicaciones y seguidores en vivo.
+              </span>
+            </div>
+
+            {/* Formulario para Agregar Nueva Publicación */}
+            <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-4">
+              <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                <Plus className="w-4 h-4 text-pink-400" />
+                <span>Añadir Publicación al Feed (Instagram o Facebook)</span>
+              </h4>
+
+              <form onSubmit={handleAddSocialPost} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">
+                    Plataforma
+                  </label>
+                  <select
+                    value={newPostPlatform}
+                    onChange={(e) => setNewPostPlatform(e.target.value as any)}
+                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
+                  >
+                    <option value="instagram">Instagram (@korensmx)</option>
+                    <option value="facebook">Facebook (KORENS MX)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">
+                    Link Directo al Post (URL) *
+                  </label>
+                  <input
+                    type="url"
+                    required
+                    placeholder="https://www.instagram.com/p/..."
+                    value={newPostUrl}
+                    onChange={(e) => setNewPostUrl(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-600"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">
+                    Título / Encabezado del Post *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Ej. 3 Errores de CV que te dejan fuera"
+                    value={newPostTitle}
+                    onChange={(e) => setNewPostTitle(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">
+                    URL de la Imagen del Post (o ruta /assets/...)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="/assets/instagram/post1_cv_ats.png o URL externa"
+                    value={newPostImage}
+                    onChange={(e) => setNewPostImage(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-600 font-mono text-[11px]"
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">
+                    Descripción / Leyenda corta (Caption)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Ej. Aprende cómo transformar tu experiencia en resultados cuantificables."
+                    value={newPostCaption}
+                    onChange={(e) => setNewPostCaption(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">Likes estimados</label>
+                  <input
+                    type="text"
+                    value={newPostLikes}
+                    onChange={(e) => setNewPostLikes(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">Fecha / Etiqueta</label>
+                  <input
+                    type="text"
+                    value={newPostDate}
+                    onChange={(e) => setNewPostDate(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
+                  />
+                </div>
+
+                <div className="md:col-span-2 pt-2 flex justify-end">
+                  <button
+                    type="submit"
+                    disabled={isSavingSocial}
+                    className="btn-orange-glow text-white text-xs font-bold px-6 py-2.5 rounded-xl flex items-center gap-2 cursor-pointer shadow-lg disabled:opacity-50"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Agregar Publicación al Feed</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            {/* Listado de Publicaciones Actuales */}
+            <div className="space-y-3">
+              <h4 className="text-sm font-bold text-white">
+                Publicaciones Activas en el Feed ({socialPosts.length})
+              </h4>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {socialPosts.map((post) => (
+                  <div
+                    key={post.id}
+                    className="p-4 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col justify-between space-y-3"
+                  >
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${
+                          post.platform === "instagram" ? "bg-pink-500/20 text-pink-400" : "bg-blue-500/20 text-blue-400"
+                        }`}>
+                          {post.platform}
+                        </span>
+                        <span className="text-[11px] text-slate-400">{post.date}</span>
+                      </div>
+
+                      <div className="aspect-video w-full rounded-xl overflow-hidden bg-slate-950">
+                        <img
+                          src={post.imageUrl}
+                          alt={post.title}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+
+                      <h5 className="text-xs font-bold text-white line-clamp-2">{post.title}</h5>
+                      {post.caption && (
+                        <p className="text-[11px] text-slate-400 line-clamp-2">{post.caption}</p>
+                      )}
+                    </div>
+
+                    <div className="pt-2 border-t border-slate-800 flex items-center justify-between">
+                      <a
+                        href={post.postUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[11px] text-cyan-400 hover:underline flex items-center gap-1 font-semibold"
+                      >
+                        <span>Ver en {post.platform}</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteSocialPost(post.id)}
+                        className="text-rose-400 hover:text-rose-300 p-1.5 rounded-lg hover:bg-rose-500/10 cursor-pointer"
+                        title="Eliminar publicación"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         )}
       </div>

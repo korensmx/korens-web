@@ -65,12 +65,38 @@ export interface Review {
   createdAt: string;
 }
 
+export interface GoogleIntegration {
+  isLinked: boolean;
+  email: string;
+  autoSyncMeet: boolean;
+  autoSyncCalendar: boolean;
+  blockBusySlots: boolean;
+  lastSyncAt?: string;
+  clientId?: string;
+  clientSecret?: string;
+}
+
+export interface SocialFeedPost {
+  id: string;
+  platform: "instagram" | "facebook";
+  postUrl: string;
+  imageUrl: string;
+  title: string;
+  caption?: string;
+  likes: string;
+  comments: string;
+  date: string;
+}
+
 export interface SiteContent {
   heroTitle: string;
   heroSubtitle: string;
   whatsappNumber: string;
   contactEmail: string;
   googleCalendarAccount?: string;
+  googleIntegration?: GoogleIntegration;
+  socialFeedPosts?: SocialFeedPost[];
+  facebookPageUrl?: string;
   diagnosticWhatsAppText: string;
   announcementText: string;
   showAnnouncement: boolean;

@@ -24,6 +24,61 @@ const DEFAULT_DB: DatabaseSchema = {
     whatsappNumber: "525659993957",
     contactEmail: "contacto@korens.mx",
     googleCalendarAccount: "korensmx@gmail.com",
+    googleIntegration: {
+      isLinked: true,
+      email: "korensmx@gmail.com",
+      autoSyncMeet: true,
+      autoSyncCalendar: true,
+      blockBusySlots: true,
+      lastSyncAt: "2026-09-04T12:00:00Z",
+    },
+    facebookPageUrl: "https://www.facebook.com/korensmx/",
+    socialFeedPosts: [
+      {
+        id: "ig-1",
+        platform: "instagram",
+        postUrl: "https://www.instagram.com/korensmx",
+        imageUrl: "/assets/instagram/post1_cv_ats.png",
+        title: "¿Por qué los filtros ATS descartan el 75% de los CVs en México?",
+        caption: "Consejos clave para estructurar tus logros con métricas de ROI y pasar lectores de IA.",
+        likes: "1,840",
+        comments: "96",
+        date: "Publicación Oficial",
+      },
+      {
+        id: "ig-2",
+        platform: "instagram",
+        postUrl: "https://www.instagram.com/korensmx",
+        imageUrl: "/assets/instagram/post2_paquetes.png",
+        title: "Plata, Oro y Platinum: 3 rutas para acelerar tu carrera.",
+        caption: "Optimización en LinkedIn, OCCMundial, Indeed y mentoría ejecutiva 1 a 1.",
+        likes: "2,410",
+        comments: "142",
+        date: "Publicación Oficial",
+      },
+      {
+        id: "ig-3",
+        platform: "instagram",
+        postUrl: "https://www.instagram.com/korensmx",
+        imageUrl: "/assets/instagram/post3_entrevistas.png",
+        title: "Simulación de Entrevista 1 a 1 vía Google Meet con retroalimentación.",
+        caption: "Metodología STAR/CAR para responder preguntas complejas y negociar hasta 40% más sueldo.",
+        likes: "3,120",
+        comments: "185",
+        date: "Publicación Oficial",
+      },
+      {
+        id: "fb-1",
+        platform: "facebook",
+        postUrl: "https://www.facebook.com/korensmx/",
+        imageUrl: "/assets/instagram/post1_cv_ats.png",
+        title: "KORENS® Consultoría Estratégica en Facebook",
+        caption: "Aprende tips diarios de empleabilidad y marca profesional.",
+        likes: "950",
+        comments: "48",
+        date: "Comunidad Facebook",
+      }
+    ],
     diagnosticWhatsAppText: "Hola KORENS, quiero solicitar mi diagnóstico de empleabilidad y recibir asesoría sobre mis opciones de carrera.",
     announcementText: "🔥 Promoción especial de temporada: hasta 50% de descuento en paquetes ejecutivos.",
     showAnnouncement: true,
@@ -380,6 +435,15 @@ function sanitizeDbInstance(instance: DatabaseSchema): DatabaseSchema {
   if (instance && instance.siteContent) {
     if (!instance.siteContent.googleCalendarAccount) {
       instance.siteContent.googleCalendarAccount = "korensmx@gmail.com";
+    }
+    if (!instance.siteContent.googleIntegration) {
+      instance.siteContent.googleIntegration = DEFAULT_DB.siteContent.googleIntegration;
+    }
+    if (!instance.siteContent.facebookPageUrl) {
+      instance.siteContent.facebookPageUrl = "https://www.facebook.com/korensmx/";
+    }
+    if (!instance.siteContent.socialFeedPosts || instance.siteContent.socialFeedPosts.length === 0) {
+      instance.siteContent.socialFeedPosts = DEFAULT_DB.siteContent.socialFeedPosts;
     }
   }
   return instance;
