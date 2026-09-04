@@ -68,6 +68,7 @@ export default function AdminDashboardPage() {
   const [googleMessage, setGoogleMessage] = useState("");
   const [webhookInput, setWebhookInput] = useState("");
   const [copiedScript, setCopiedScript] = useState(false);
+  const [copiedLinkKey, setCopiedLinkKey] = useState<string | null>(null);
 
   // Social Feed states
   const [socialPosts, setSocialPosts] = useState<SocialFeedPost[]>([]);
@@ -1863,6 +1864,121 @@ export default function AdminDashboardPage() {
                   <p className="text-[11px] text-slate-400 leading-relaxed">
                     Mantiene 30 minutos de descanso entre cada sesión ejecutiva para preparar reportes.
                   </p>
+                </div>
+              </div>
+
+              {/* Calendario de Google en Vivo Incrustado (Oficial) */}
+              <div className="p-6 rounded-3xl bg-slate-950 border border-slate-800 space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800/80">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center">
+                      <Calendar className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                        <span>Tu Google Calendar Oficial en Vivo</span>
+                        <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold">
+                          ● America/Monterrey
+                        </span>
+                      </h4>
+                      <p className="text-[11px] text-slate-400">
+                        Visualización directa de tu agenda para monitorear citas agendadas y espacios libres.
+                      </p>
+                    </div>
+                  </div>
+
+                  <a
+                    href="https://calendar.google.com/calendar/r"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700 text-xs font-bold flex items-center gap-1.5 transition-colors self-start sm:self-auto cursor-pointer"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5 text-blue-400" />
+                    <span>Abrir Google Calendar</span>
+                  </a>
+                </div>
+
+                {/* Google Calendar Iframe */}
+                <div className="w-full rounded-2xl overflow-hidden border border-slate-800 bg-white shadow-2xl">
+                  <iframe
+                    src="https://calendar.google.com/calendar/embed?src=korensmx%40gmail.com&ctz=America%2FMonterrey&mode=WEEK&showTitle=0&showNav=1&showDate=1&showPrint=0&showTabs=1&showCalendars=0&showTz=1"
+                    style={{ border: 0 }}
+                    width="100%"
+                    height="500"
+                    frameBorder="0"
+                    scrolling="no"
+                    title="Calendario Oficial KORENS"
+                    className="w-full"
+                  />
+                </div>
+
+                {/* Enlaces de Sincronización Externa e iCal */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
+                  <div className="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800/80 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                        <Link2 className="w-3.5 h-3.5 text-emerald-400" />
+                        <span>Dirección Secreta iCal (Apple Calendar, Mac, iPhone)</span>
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigator.clipboard.writeText(
+                            "https://calendar.google.com/calendar/ical/korensmx%40gmail.com/private-ec2f92bf3646a376234e8c64408c7893/basic.ics"
+                          );
+                          setCopiedLinkKey("secretIcal");
+                          setTimeout(() => setCopiedLinkKey(null), 2500);
+                        }}
+                        className="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold flex items-center gap-1 border border-slate-700 cursor-pointer"
+                      >
+                        {copiedLinkKey === "secretIcal" ? (
+                          <CheckCheck className="w-3 h-3 text-emerald-400" />
+                        ) : (
+                          <Copy className="w-3 h-3" />
+                        )}
+                        <span>{copiedLinkKey === "secretIcal" ? "¡Copiado!" : "Copiar iCal"}</span>
+                      </button>
+                    </div>
+                    <p className="text-[10px] text-slate-400 truncate font-mono bg-slate-950 p-2 rounded-lg border border-slate-800/60 select-all">
+                      https://calendar.google.com/calendar/ical/korensmx%40gmail.com/private-ec2f92bf3646a376234e8c64408c7893/basic.ics
+                    </p>
+                    <p className="text-[10px] text-slate-500 leading-tight">
+                      Tu web utiliza esta dirección para detectar automáticamente eventos ocupados y evitar que dos personas agenden a la misma hora.
+                    </p>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800/80 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                        <Globe className="w-3.5 h-3.5 text-blue-400" />
+                        <span>Enlace Público del Calendario (Incrustar / Web)</span>
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigator.clipboard.writeText(
+                            "https://calendar.google.com/calendar/embed?src=korensmx%40gmail.com&ctz=America%2FMonterrey"
+                          );
+                          setCopiedLinkKey("embedUrl");
+                          setTimeout(() => setCopiedLinkKey(null), 2500);
+                        }}
+                        className="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold flex items-center gap-1 border border-slate-700 cursor-pointer"
+                      >
+                        {copiedLinkKey === "embedUrl" ? (
+                          <CheckCheck className="w-3 h-3 text-emerald-400" />
+                        ) : (
+                          <Copy className="w-3 h-3" />
+                        )}
+                        <span>{copiedLinkKey === "embedUrl" ? "¡Copiado!" : "Copiar URL"}</span>
+                      </button>
+                    </div>
+                    <p className="text-[10px] text-slate-400 truncate font-mono bg-slate-950 p-2 rounded-lg border border-slate-800/60 select-all">
+                      https://calendar.google.com/calendar/embed?src=korensmx%40gmail.com&ctz=America%2FMonterrey
+                    </p>
+                    <p className="text-[10px] text-slate-500 leading-tight">
+                      Enlace directo de Google Calendar configurado con la zona horaria oficial de Monterrey / México Central.
+                    </p>
+                  </div>
                 </div>
               </div>
 

@@ -52,7 +52,7 @@ export function buildGoogleCalendarUrl(data: CalendarEventData): string {
   const location = encodeURIComponent(data.meetLink || "Google Meet");
   const dates = `${startFormatted}/${endFormatted}`;
 
-  return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dates}&details=${details}&location=${location}&add=${attendees}&ctz=America/Mexico_City`;
+  return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dates}&details=${details}&location=${location}&add=${attendees}&ctz=America/Monterrey`;
 }
 
 /**
@@ -208,3 +208,84 @@ export async function sendGoogleAppsScriptWebhook(
     return { success: false, error: err.message || "Error al conectar con Google Apps Script" };
   }
 }
+
+/**
+ * Parsea una fecha en formato iCalendar (.ics)
+ */
+export function parseIcalDate(dateStr: string): Date | null {
+  if (!dateStr) return null;
+  // Formato 1: 20260907T160000Z (UTC)
+  const utcMatch = dateStr.match(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z$/);
+  if (utcMatch) {
+    const [, y, m, d, h, min, s] = utcMatch;
+    return new Date(Date.UTC(+y, +m - 1, +d, +h, +min, +s));
+  }
+  // Formato 2: 20260907T100000 (Hora local de México/Monterrey GMT-6 sin Z)
+  const localMatch = dateStr.match(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})$/);
+  if (localMatch) {
+    const [, y, m, d, h, min, s] = localMatch;
+    return new Date(Date.UTC(+y, +m - 1, +d, +h + 6, +min, +s));
+  }
+  // Formato 3: 20260907 (Todo el día)
+  const dayMatch = dateStr.match(/^(\d{4})(\d{2})(\d{2})$/);
+  if (dayMatch) {
+    const [, y, m, d] = dayMatch;
+    return new Date(Date.UTC(+y, +m - 1, +d, 6, 0, 0));
+  }
+  const fallback = new Date(dateStr);
+  return isNaN(fallback.getTime()) ? null : fallback;
+}
+
+/**
+ * Parsea un archivo iCal (.ics) y extrae los intervalos de eventos ocupados
+ */
+export function parseIcalBusyIntervals(icsText: string): Array<{ start: Date; end: Date; summary?: string }> {
+  const intervals: Array<{ start: Date; end: Date; summary?: string }> = [];
+  const veventRegex = /BEGIN:VEVENT([\s\S]*?)END:VEVENT/g;
+  let match: RegExpExecArray | null;
+
+  while ((match = veventRegex.exec(icsText)) !== null) {
+    const eventBlock = match[1];
+
+    if (/STATUS:CANCELLED/i.test(eventBlock)) continue;
+
+    const startMatch = eventBlock.match(/DTSTART(?:;[^:]+)?:(\S+)/);
+    const endMatch = eventBlock.match(/DTEND(?:;[^:]+)?:(\S+)/);
+    const summaryMatch = eventBlock.match(/SUMMARY:(.+)/);
+
+    if (startMatch && startMatch[1]) {
+      const startDate = parseIcalDate(startMatch[1].trim());
+      let endDate = endMatch && endMatch[1] ? parseIcalDate(endMatch[1].trim()) : null;
+
+      if (startDate) {
+        if (!endDate) {
+          endDate = new Date(startDate.getTime() + 45 * 60 * 1000);
+        }
+        intervals.push({
+          start: startDate,
+          end: endDate,
+          summary: summaryMatch ? summaryMatch[1].trim() : undefined,
+        });
+      }
+    }
+  }
+
+  return intervals;
+}
+
+/**
+ * Determina si un bloque propuesto se empalma con algún evento existente o su margen de descanso
+ */
+export function isSlotOverlapping(
+  slotStart: Date,
+  slotEnd: Date,
+  busyIntervals: Array<{ start: Date; end: Date }>,
+  bufferMinutes: number = 0
+): boolean {
+  return busyIntervals.some((b) => {
+    const bufferedStart = new Date(b.start.getTime() - bufferMinutes * 60 * 1000);
+    const bufferedEnd = new Date(b.end.getTime() + bufferMinutes * 60 * 1000);
+    return slotStart < bufferedEnd && slotEnd > bufferedStart;
+  });
+}
+

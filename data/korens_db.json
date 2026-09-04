@@ -24,6 +24,10 @@
       "autoSyncMeet": true,
       "autoSyncCalendar": true,
       "blockBusySlots": true,
+      "calendarEmbedUrl": "https://calendar.google.com/calendar/embed?src=korensmx%40gmail.com&ctz=America%2FMonterrey",
+      "calendarIcalUrl": "https://calendar.google.com/calendar/ical/korensmx%40gmail.com/private-ec2f92bf3646a376234e8c64408c7893/basic.ics",
+      "calendarPublicIcalUrl": "https://calendar.google.com/calendar/ical/korensmx%40gmail.com/public/basic.ics",
+      "timezone": "America/Monterrey",
       "lastSyncAt": "2026-09-04T12:00:00Z"
     },
     "facebookPageUrl": "https://www.facebook.com/korensmx/",

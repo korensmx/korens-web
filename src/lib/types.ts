@@ -79,6 +79,10 @@ export interface GoogleIntegration {
   clientId?: string;
   clientSecret?: string;
   webhookUrl?: string;
+  calendarEmbedUrl?: string;
+  calendarIcalUrl?: string;
+  calendarPublicIcalUrl?: string;
+  timezone?: string;
 }
 
 export interface FacebookPost {

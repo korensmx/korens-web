@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   X,
   ShieldCheck,
@@ -42,6 +42,8 @@ export default function CheckoutModal({ product, isOpen, onClose }: CheckoutModa
   // Scheduling states
   const [selectedDateIndex, setSelectedDateIndex] = useState(0);
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>("10:15 - 11:00");
+  const [slotAvailability, setSlotAvailability] = useState<Record<string, { available: boolean; reason?: string }>>({});
+  const [isLoadingSlots, setIsLoadingSlots] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -70,6 +72,42 @@ export default function CheckoutModal({ product, isOpen, onClose }: CheckoutModa
     return days;
   }, []);
 
+  const currentDay = availableDays[selectedDateIndex] || availableDays[0];
+
+  // Fetch real-time Google Calendar slot availability
+  useEffect(() => {
+    if (!isOpen || !currentDay) return;
+    let isMounted = true;
+    setIsLoadingSlots(true);
+
+    fetch(`/api/calendar/availability?date=${currentDay.dateString}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (isMounted && data.success && Array.isArray(data.slots)) {
+          const map: Record<string, { available: boolean; reason?: string }> = {};
+          data.slots.forEach((s: any) => {
+            map[s.label] = { available: s.available, reason: s.reason };
+          });
+          setSlotAvailability(map);
+
+          if (map[selectedTimeSlot]?.available === false) {
+            const firstAvailable = data.slots.find((s: any) => s.available);
+            if (firstAvailable) {
+              setSelectedTimeSlot(firstAvailable.label);
+            }
+          }
+        }
+      })
+      .catch((err) => console.warn("Error fetching slot availability:", err))
+      .finally(() => {
+        if (isMounted) setIsLoadingSlots(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [isOpen, selectedDateIndex, currentDay?.dateString]);
+
   // 45-minute slots with 30-minute buffers between meetings
   const timeSlots = [
     { label: "09:00 - 09:45", startHour: 9, startMin: 0, endHour: 9, endMin: 45 },
@@ -83,8 +121,6 @@ export default function CheckoutModal({ product, isOpen, onClose }: CheckoutModa
   ];
 
   if (!isOpen || !product) return null;
-
-  const currentDay = availableDays[selectedDateIndex] || availableDays[0];
 
   // Unique Meet Link generation
   const meetRoomCode = `kor-${product.id.slice(0, 3)}-${name.slice(0, 3).toLowerCase() || "ses"}`.replace(/[^a-z0-9-]/g, "");
@@ -364,28 +400,45 @@ export default function CheckoutModal({ product, isOpen, onClose }: CheckoutModa
 
               {/* Bloques de 45 minutos con 30 minutos de descanso */}
               <div>
-                <label className="block text-xs font-bold text-white mb-2 flex items-center justify-between">
-                  <span className="flex items-center gap-1.5">
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-xs font-bold text-white flex items-center gap-1.5">
                     <Clock className="w-4 h-4 text-korens-orange" />
-                    <span>Horarios disponibles (Bloques de 45 min con 30 min entre citas):</span>
-                  </span>
-                </label>
+                    <span>Horarios disponibles (Bloques de 45 min con 30 min de espacio):</span>
+                  </label>
+                  {isLoadingSlots && (
+                    <span className="text-[10px] text-emerald-400 font-bold flex items-center gap-1 animate-pulse">
+                      ● Verificando Google Calendar...
+                    </span>
+                  )}
+                </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {timeSlots.map((slot) => {
                     const isSelected = selectedTimeSlot === slot.label;
+                    const availability = slotAvailability[slot.label];
+                    const isAvailable = availability ? availability.available : true;
+
                     return (
                       <button
                         key={slot.label}
                         type="button"
+                        disabled={!isAvailable}
                         onClick={() => setSelectedTimeSlot(slot.label)}
-                        className={`p-2.5 rounded-xl text-center border text-xs font-bold transition-all cursor-pointer ${
-                          isSelected
-                            ? "bg-korens-orange text-white border-korens-orange shadow-md"
-                            : "bg-slate-900 border-slate-800 text-slate-200 hover:border-korens-orange/50 hover:bg-slate-800"
+                        className={`p-2.5 rounded-xl text-center border text-xs font-bold transition-all ${
+                          !isAvailable
+                            ? "bg-slate-950/60 border-slate-900 text-slate-600 cursor-not-allowed opacity-50 line-through"
+                            : isSelected
+                            ? "bg-korens-orange text-white border-korens-orange shadow-md cursor-pointer"
+                            : "bg-slate-900 border-slate-800 text-slate-200 hover:border-korens-orange/50 hover:bg-slate-800 cursor-pointer"
                         }`}
+                        title={!isAvailable ? (availability?.reason || "Horario no disponible en Google Calendar") : "Disponible para agendar"}
                       >
-                        {slot.label}
+                        <div>{slot.label}</div>
+                        {!isAvailable && (
+                          <span className="text-[9px] uppercase tracking-wider font-extrabold text-red-400/90 block mt-0.5 no-underline">
+                            Ocupado
+                          </span>
+                        )}
                       </button>
                     );
                   })}
