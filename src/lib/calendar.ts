@@ -184,6 +184,8 @@ export async function sendGoogleAppsScriptWebhook(
         description: eventData.description,
         startTime: eventData.startIso,
         endTime: eventData.endIso,
+        startIso: eventData.startIso,
+        endIso: eventData.endIso,
         meetLink: eventData.meetLink,
         clientName: eventData.clientName,
         clientEmail: eventData.clientEmail,

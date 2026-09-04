@@ -2009,14 +2009,35 @@ export default function AdminDashboardPage() {
                         type="button"
                         onClick={() => {
                           navigator.clipboard.writeText(`function doPost(e) {
-  var data = JSON.parse(e.postData.contents);
-  var cal = CalendarApp.getDefaultCalendar();
-  var event = cal.createEvent(data.title, new Date(data.startIso), new Date(data.endIso), {
-    description: data.description + "\\n\\nGoogle Meet: " + data.meetLink,
-    guests: data.clientEmail + "," + data.ownerEmail,
-    sendInvites: true
-  });
-  return ContentService.createTextOutput(JSON.stringify({ success: true, eventId: event.getId() })).setMimeType(ContentService.MimeType.JSON);
+  try {
+    var data = JSON.parse(e.postData.contents);
+    var cal = CalendarApp.getDefaultCalendar();
+    var start = new Date(data.startIso || data.startTime);
+    var end = new Date(data.endIso || data.endTime);
+    var title = data.title || ("Sesión KORENS® con " + (data.clientName || "Cliente"));
+    var description = (data.description || "") + 
+      "\\n\\n💻 Sala Google Meet: " + (data.meetLink || "") +
+      "\\n👤 Candidato: " + (data.clientName || "") +
+      "\\n📱 WhatsApp: " + (data.clientPhone || "") +
+      "\\n💼 Servicio: " + (data.productTitle || "") +
+      "\\n\\n⚠️ Sesión confirmada al acreditarse el pago en Mercado Pago.";
+    var guests = [];
+    if (data.clientEmail) guests.push(data.clientEmail);
+    if (data.ownerEmail) guests.push(data.ownerEmail);
+    var event = cal.createEvent(title, start, end, {
+      description: description,
+      location: data.meetLink || "Google Meet",
+      guests: guests.join(","),
+      sendInvites: true
+    });
+    return ContentService.createTextOutput(
+      JSON.stringify({ success: true, eventId: event.getId(), meetLink: data.meetLink })
+    ).setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(
+      JSON.stringify({ success: false, error: err.toString() })
+    ).setMimeType(ContentService.MimeType.JSON);
+  }
 }`);
                           setCopiedScript(true);
                           setTimeout(() => setCopiedScript(false), 3000);
@@ -2029,14 +2050,35 @@ export default function AdminDashboardPage() {
                     </div>
                     <pre className="p-3.5 rounded-xl bg-black/60 border border-slate-800 text-[10px] font-mono text-emerald-300 overflow-x-auto leading-relaxed">
 {`function doPost(e) {
-  var data = JSON.parse(e.postData.contents);
-  var cal = CalendarApp.getDefaultCalendar();
-  var event = cal.createEvent(data.title, new Date(data.startIso), new Date(data.endIso), {
-    description: data.description + "\\n\\nGoogle Meet: " + data.meetLink,
-    guests: data.clientEmail + "," + data.ownerEmail,
-    sendInvites: true
-  });
-  return ContentService.createTextOutput(JSON.stringify({ success: true, eventId: event.getId() })).setMimeType(ContentService.MimeType.JSON);
+  try {
+    var data = JSON.parse(e.postData.contents);
+    var cal = CalendarApp.getDefaultCalendar();
+    var start = new Date(data.startIso || data.startTime);
+    var end = new Date(data.endIso || data.endTime);
+    var title = data.title || ("Sesión KORENS® con " + (data.clientName || "Cliente"));
+    var description = (data.description || "") + 
+      "\\n\\n💻 Sala Google Meet: " + (data.meetLink || "") +
+      "\\n👤 Candidato: " + (data.clientName || "") +
+      "\\n📱 WhatsApp: " + (data.clientPhone || "") +
+      "\\n💼 Servicio: " + (data.productTitle || "") +
+      "\\n\\n⚠️ Sesión confirmada al acreditarse el pago en Mercado Pago.";
+    var guests = [];
+    if (data.clientEmail) guests.push(data.clientEmail);
+    if (data.ownerEmail) guests.push(data.ownerEmail);
+    var event = cal.createEvent(title, start, end, {
+      description: description,
+      location: data.meetLink || "Google Meet",
+      guests: guests.join(","),
+      sendInvites: true
+    });
+    return ContentService.createTextOutput(
+      JSON.stringify({ success: true, eventId: event.getId(), meetLink: data.meetLink })
+    ).setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(
+      JSON.stringify({ success: false, error: err.toString() })
+    ).setMimeType(ContentService.MimeType.JSON);
+  }
 }`}
                     </pre>
                   </div>
