@@ -23,6 +23,7 @@ const DEFAULT_DB: DatabaseSchema = {
     heroSubtitle: "Transformamos talento invisible en una propuesta profesional clara, competitiva y lista para abrir conversaciones con las empresas correctas.",
     whatsappNumber: "525659993957",
     contactEmail: "contacto@korens.mx",
+    googleCalendarAccount: "korensmx@gmail.com",
     diagnosticWhatsAppText: "Hola KORENS, quiero solicitar mi diagnóstico de empleabilidad y recibir asesoría sobre mis opciones de carrera.",
     announcementText: "🔥 Promoción especial de temporada: hasta 50% de descuento en paquetes ejecutivos.",
     showAnnouncement: true,
@@ -55,7 +56,7 @@ const DEFAULT_DB: DatabaseSchema = {
         "Archivos finales en formato PDF editable y Word de alta resolución",
         "Garantía de revisión y ajustes durante los primeros 7 días"
       ],
-      mercadoPagoUrl: "https://mpago.la/pos/korens-plata"
+      mercadoPagoUrl: "https://mpago.li/2iyNf29"
     },
     {
       id: "pkg-oro",
@@ -76,7 +77,7 @@ const DEFAULT_DB: DatabaseSchema = {
         "Auditoría de compatibilidad de palabras clave con algoritmos de reclutamiento",
         "Soporte prioritario por WhatsApp durante el proceso"
       ],
-      mercadoPagoUrl: "https://mpago.la/pos/korens-oro"
+      mercadoPagoUrl: "https://mpago.li/1D94XqQ"
     },
     {
       id: "pkg-platinum",
@@ -115,7 +116,7 @@ const DEFAULT_DB: DatabaseSchema = {
         "Revisión profunda de ortografía, estilo y jerarquía",
         "Formato editable en Word + PDF listo para imprimir o enviar"
       ],
-      mercadoPagoUrl: "https://mpago.la/pos/korens-srv-cv"
+      mercadoPagoUrl: "https://mpago.li/1k3nPnm"
     },
     {
       id: "srv-plataforma",
@@ -133,7 +134,7 @@ const DEFAULT_DB: DatabaseSchema = {
         "Extracto / Acerca de mí que engancha al reclutador",
         "Ajuste de preferencias de empleo para visibilidad inmediata"
       ],
-      mercadoPagoUrl: "https://mpago.la/pos/korens-srv-plataforma"
+      mercadoPagoUrl: "https://mpago.li/2XxPfBe"
     },
     {
       id: "srv-cv-ingles",
@@ -151,7 +152,7 @@ const DEFAULT_DB: DatabaseSchema = {
         "Revisión nativa de fluidez y concisión sintáctica",
         "Formato editable bilingüe"
       ],
-      mercadoPagoUrl: "https://mpago.la/pos/korens-srv-cv-ingles"
+      mercadoPagoUrl: "https://mpago.li/2A6WCcZ"
     },
     {
       id: "srv-asesoria",
@@ -169,7 +170,7 @@ const DEFAULT_DB: DatabaseSchema = {
         "Definición de rango salarial competitivo para tu perfil",
         "Reporte ejecutivo personalizado enviado por correo electrónico"
       ],
-      mercadoPagoUrl: "https://mpago.la/pos/korens-srv-asesoria"
+      mercadoPagoUrl: "https://mpago.li/2D5iwBr"
     },
     {
       id: "srv-simulacion",
@@ -187,7 +188,7 @@ const DEFAULT_DB: DatabaseSchema = {
         "Feedback inmediato sobre tono de voz, seguridad y contenido",
         "Reporte escrito con plan de mejora enviado a tu correo"
       ],
-      mercadoPagoUrl: "https://mpago.la/pos/korens-srv-simulacion"
+      mercadoPagoUrl: "https://mpago.li/2r26TTz"
     }
   ],
   leads: [
@@ -347,15 +348,46 @@ La negociación salarial nunca debe basarse en tus gastos personales ("tengo que
   diagnostics: []
 };
 
+export const OFFICIAL_MERCADO_PAGO_URLS: Record<string, string> = {
+  "pkg-plata": "https://mpago.li/2iyNf29",
+  "pkg-oro": "https://mpago.li/1D94XqQ",
+  "pkg-platinum": "https://mpago.li/1LSRZY2",
+  "srv-cv": "https://mpago.li/1k3nPnm",
+  "srv-plataforma": "https://mpago.li/2XxPfBe",
+  "srv-cv-ingles": "https://mpago.li/2A6WCcZ",
+  "srv-asesoria": "https://mpago.li/2D5iwBr",
+  "srv-simulacion": "https://mpago.li/2r26TTz",
+};
+
 const TMP_DB_FILE = path.join("/tmp", "korens_db.json");
 
 declare global {
   var __korens_db_instance: DatabaseSchema | undefined;
 }
 
+function sanitizeDbInstance(instance: DatabaseSchema): DatabaseSchema {
+  if (instance && instance.products) {
+    instance.products = instance.products.map((p) => {
+      const officialUrl = OFFICIAL_MERCADO_PAGO_URLS[p.id];
+      if (officialUrl) {
+        if (!p.mercadoPagoUrl || p.mercadoPagoUrl.includes("mpago.la/pos/korens-")) {
+          return { ...p, mercadoPagoUrl: officialUrl };
+        }
+      }
+      return p;
+    });
+  }
+  if (instance && instance.siteContent) {
+    if (!instance.siteContent.googleCalendarAccount) {
+      instance.siteContent.googleCalendarAccount = "korensmx@gmail.com";
+    }
+  }
+  return instance;
+}
+
 function ensureDb(): DatabaseSchema {
   if (globalThis.__korens_db_instance) {
-    return globalThis.__korens_db_instance;
+    return sanitizeDbInstance(globalThis.__korens_db_instance);
   }
 
   // 1. Try reading from /tmp (persisted during serverless container lifecycle)
@@ -363,8 +395,8 @@ function ensureDb(): DatabaseSchema {
     try {
       const raw = fs.readFileSync(TMP_DB_FILE, "utf-8");
       const data = JSON.parse(raw);
-      globalThis.__korens_db_instance = { ...DEFAULT_DB, ...data };
-      return globalThis.__korens_db_instance!;
+      globalThis.__korens_db_instance = sanitizeDbInstance({ ...DEFAULT_DB, ...data });
+      return globalThis.__korens_db_instance;
     } catch (err) {
       console.warn("Could not read /tmp database:", err);
     }
@@ -375,15 +407,15 @@ function ensureDb(): DatabaseSchema {
     try {
       const raw = fs.readFileSync(DB_FILE, "utf-8");
       const data = JSON.parse(raw);
-      globalThis.__korens_db_instance = { ...DEFAULT_DB, ...data };
-      return globalThis.__korens_db_instance!;
+      globalThis.__korens_db_instance = sanitizeDbInstance({ ...DEFAULT_DB, ...data });
+      return globalThis.__korens_db_instance;
     } catch (err) {
       console.error("Error reading database from DB_FILE:", err);
     }
   }
 
-  globalThis.__korens_db_instance = { ...DEFAULT_DB };
-  return globalThis.__korens_db_instance!;
+  globalThis.__korens_db_instance = sanitizeDbInstance({ ...DEFAULT_DB });
+  return globalThis.__korens_db_instance;
 }
 
 function writeDb(data: DatabaseSchema): void {

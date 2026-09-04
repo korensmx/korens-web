@@ -25,6 +25,7 @@ import {
   Sliders,
   Sparkles,
   Video,
+  Calendar,
 } from "lucide-react";
 import { Lead, Product, BlogPost, BlogComment, Review, SiteContent, DiagnosticSubmission } from "@/lib/types";
 
@@ -587,10 +588,10 @@ export default function AdminDashboardPage() {
                   {leads.map((lead) => {
                     const cleanPhone = lead.whatsapp.replace(/\D/g, "");
                     const appointmentDetails = lead.scheduledDate
-                      ? ` y tu sesión en Google Meet para el ${lead.scheduledDate} en el horario de ${lead.scheduledTime}`
+                      ? ` Tu sesión virtual de 45 min en Google Meet está pre-agendada para el ${lead.scheduledDate} a las ${lead.scheduledTime}. Enlace Meet: ${lead.meetLink || "Por confirmar"}. (Nota: La sesión se llevará a cabo una vez confirmado tu pago en Mercado Pago).`
                       : "";
                     const waText = encodeURIComponent(
-                      `Hola ${lead.name}, te saludo de KORENS Consultoría Estratégica respecto a tu solicitud de ${lead.productTitle}${appointmentDetails}. ¿Cómo te encuentras hoy?`
+                      `Hola ${lead.name}, te saludo de KORENS Consultoría Estratégica respecto a tu solicitud de ${lead.productTitle}.${appointmentDetails} ¿Cómo te encuentras hoy?`
                     );
                     const waLink = `https://wa.me/${cleanPhone}?text=${waText}`;
 
@@ -605,24 +606,37 @@ export default function AdminDashboardPage() {
                         <td className="p-3.5 font-black text-korens-orange">${lead.price} MXN</td>
                         <td className="p-3.5">
                           {lead.scheduledDate ? (
-                            <div className="space-y-1">
+                            <div className="space-y-1.5">
                               <span className="font-bold text-emerald-400 block">
                                 📅 {lead.scheduledDate}
                               </span>
                               <span className="text-slate-300 font-semibold block text-[11px]">
                                 ⏰ {lead.scheduledTime} (45 min)
                               </span>
-                              {lead.meetLink && (
-                                <a
-                                  href={lead.meetLink}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-1 text-[10px] text-cyan-400 hover:text-cyan-300 underline font-mono"
-                                >
-                                  <Video className="w-3 h-3" />
-                                  <span>Abrir Google Meet</span>
-                                </a>
-                              )}
+                              <div className="flex flex-col gap-1 pt-1">
+                                {lead.meetLink && (
+                                  <a
+                                    href={lead.meetLink}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1 text-[10px] text-cyan-400 hover:text-cyan-300 underline font-mono"
+                                  >
+                                    <Video className="w-3 h-3" />
+                                    <span>Abrir Google Meet</span>
+                                  </a>
+                                )}
+                                {lead.calendarUrl && (
+                                  <a
+                                    href={lead.calendarUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1 text-[10px] text-amber-400 hover:text-amber-300 font-medium"
+                                  >
+                                    <Calendar className="w-3 h-3" />
+                                    <span>Añadir a Google Calendar (korensmx@gmail.com)</span>
+                                  </a>
+                                )}
+                              </div>
                             </div>
                           ) : (
                             <span className="text-slate-500 italic text-[11px]">Sin cita agendada</span>
@@ -1297,6 +1311,22 @@ export default function AdminDashboardPage() {
                     className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
                   />
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  Cuenta Google Oficial para Sincronización de Citas (Google Calendar & Meet)
+                </label>
+                <input
+                  type="email"
+                  value={siteContent.googleCalendarAccount || "korensmx@gmail.com"}
+                  onChange={(e) => setSiteContent({ ...siteContent, googleCalendarAccount: e.target.value })}
+                  className="w-full bg-slate-900 border border-emerald-500/50 rounded-xl px-4 py-2 text-xs text-emerald-300 font-semibold"
+                  placeholder="korensmx@gmail.com"
+                />
+                <span className="text-[11px] text-slate-400 mt-1 block">
+                  Esta cuenta de Google recibe la invitación automática de todas las sesiones de Google Meet agendadas por los clientes.
+                </span>
               </div>
 
               <div>

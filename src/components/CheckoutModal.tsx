@@ -99,12 +99,20 @@ export default function CheckoutModal({ product, isOpen, onClose }: CheckoutModa
 
     const title = encodeURIComponent(`Sesión Estratégica KORENS® - ${product.name}`);
     const details = encodeURIComponent(
-      `Sesión 1 a 1 de 45 minutos con tu consultor KORENS.\n\nEnlace de Google Meet: ${meetLink}\n\nIMPORTANTE: La sesión se confirmará únicamente una vez confirmado el pago en Mercado Pago.`
+      `Sesión Estratégica 1 a 1 de 45 minutos con tu consultor KORENS.\n\n` +
+      `👤 Cliente: ${name}\n` +
+      `📱 WhatsApp: ${whatsapp}\n` +
+      `✉️ Correo: ${email}\n` +
+      `💼 Servicio: ${product.name}\n` +
+      `💻 Enlace Google Meet: ${meetLink}\n` +
+      `🏢 Organiza: KORENS® Consultoría Estratégica (korensmx@gmail.com)\n\n` +
+      `⚠️ CONDICIÓN OBLIGATORIA: La sesión virtual en Google Meet se llevará a cabo ÚNICAMENTE una vez que tu pago en Mercado Pago esté 100% confirmado.`
     );
     const location = encodeURIComponent(meetLink);
     const dates = `${formatGCal(startIso)}/${formatGCal(endIso)}`;
+    const attendees = email.trim() ? `korensmx@gmail.com,${encodeURIComponent(email.trim())}` : "korensmx@gmail.com";
 
-    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dates}&details=${details}&location=${location}`;
+    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dates}&details=${details}&location=${location}&add=${attendees}`;
   };
 
   const handleStep1Submit = (e: React.FormEvent) => {
@@ -380,7 +388,7 @@ export default function CheckoutModal({ product, isOpen, onClose }: CheckoutModa
                   <Video className="w-4 h-4" />
                 </div>
                 <div className="text-xs space-y-1">
-                  <span className="font-bold text-white block">Reunión Virtual vía Google Meet</span>
+                  <span className="font-bold text-white block">Reunión Virtual vía Google Meet (korensmx@gmail.com)</span>
                   <p className="text-slate-300 leading-relaxed text-[11px]">
                     Sala privada pre-asignada:{" "}
                     <code className="text-emerald-400 bg-slate-950 px-1.5 py-0.5 rounded font-mono text-[10px]">
@@ -388,7 +396,7 @@ export default function CheckoutModal({ product, isOpen, onClose }: CheckoutModa
                     </code>
                   </p>
                   <p className="text-slate-400 text-[10px]">
-                    Podrás sincronizar la cita en tu Google Calendar en el siguiente paso.
+                    Sincronizada con la agenda oficial de <strong className="text-slate-300">korensmx@gmail.com</strong>. Podrás añadirla a tu Google Calendar en el siguiente paso.
                   </p>
                 </div>
               </div>
@@ -453,12 +461,12 @@ export default function CheckoutModal({ product, isOpen, onClose }: CheckoutModa
                       <span className="text-slate-400">Canal:</span>
                       <span className="font-bold text-white flex items-center gap-1 text-emerald-400">
                         <Video className="w-3.5 h-3.5" />
-                        <span>Google Meet Privado</span>
+                        <span>Google Meet (korensmx@gmail.com)</span>
                       </span>
                     </div>
                   </div>
 
-                  {/* Botón Sincronizar Google Calendar (Opcional antes o después de pagar) */}
+                  {/* Botón Sincronizar Google Calendar */}
                   <a
                     href={getGoogleCalendarUrl()}
                     target="_blank"
@@ -466,7 +474,7 @@ export default function CheckoutModal({ product, isOpen, onClose }: CheckoutModa
                     className="w-full py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 text-xs font-semibold flex items-center justify-center gap-2 transition-colors"
                   >
                     <Calendar className="w-4 h-4 text-korens-orange" />
-                    <span>Añadir recordatorio a mi Google Calendar</span>
+                    <span>Añadir a Google Calendar (Invita a korensmx@gmail.com)</span>
                     <ExternalLink className="w-3 h-3 text-slate-400" />
                   </a>
 

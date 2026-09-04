@@ -70,6 +70,7 @@ export interface SiteContent {
   heroSubtitle: string;
   whatsappNumber: string;
   contactEmail: string;
+  googleCalendarAccount?: string;
   diagnosticWhatsAppText: string;
   announcementText: string;
   showAnnouncement: boolean;

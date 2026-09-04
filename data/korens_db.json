@@ -16,7 +16,8 @@
       "facebook": "https://www.facebook.com/korensmx/",
       "tiktok": "https://www.tiktok.com/@korensmx",
       "x": "https://x.com/Korens_MX"
-    }
+    },
+    "googleCalendarAccount": "korensmx@gmail.com"
   },
   "products": [
     {
@@ -37,7 +38,7 @@
         "Archivos en PDF y Word editable",
         "Garantía de satisfacción"
       ],
-      "mercadoPagoUrl": "https://mpago.la/pos/korens-plata"
+      "mercadoPagoUrl": "https://mpago.li/2iyNf29"
     },
     {
       "id": "pkg-oro",
@@ -58,7 +59,7 @@
         "Auditoría de compatibilidad de palabras clave con algoritmos de reclutamiento",
         "Soporte prioritario por WhatsApp durante el proceso"
       ],
-      "mercadoPagoUrl": "https://mpago.la/pos/korens-oro"
+      "mercadoPagoUrl": "https://mpago.li/1D94XqQ"
     },
     {
       "id": "pkg-platinum",
@@ -97,7 +98,7 @@
         "Revisión profunda de ortografía, estilo y jerarquía",
         "Formato editable en Word + PDF listo para imprimir o enviar"
       ],
-      "mercadoPagoUrl": "https://mpago.la/pos/korens-srv-cv"
+      "mercadoPagoUrl": "https://mpago.li/1k3nPnm"
     },
     {
       "id": "srv-plataforma",
@@ -115,7 +116,7 @@
         "Extracto / Acerca de mí que engancha al reclutador",
         "Ajuste de preferencias de empleo para visibilidad inmediata"
       ],
-      "mercadoPagoUrl": "https://mpago.la/pos/korens-srv-plataforma"
+      "mercadoPagoUrl": "https://mpago.li/2XxPfBe"
     },
     {
       "id": "srv-cv-ingles",
@@ -133,7 +134,7 @@
         "Revisión nativa de fluidez y concisión sintáctica",
         "Formato editable bilingüe"
       ],
-      "mercadoPagoUrl": "https://mpago.la/pos/korens-srv-cv-ingles"
+      "mercadoPagoUrl": "https://mpago.li/2A6WCcZ"
     },
     {
       "id": "srv-asesoria",
@@ -151,7 +152,7 @@
         "Definición de rango salarial competitivo para tu perfil",
         "Reporte ejecutivo personalizado enviado por correo electrónico"
       ],
-      "mercadoPagoUrl": "https://mpago.la/pos/korens-srv-asesoria"
+      "mercadoPagoUrl": "https://mpago.li/2D5iwBr"
     },
     {
       "id": "srv-simulacion",
@@ -169,7 +170,7 @@
         "Feedback inmediato sobre tono de voz, seguridad y contenido",
         "Reporte escrito con plan de mejora enviado a tu correo"
       ],
-      "mercadoPagoUrl": "https://mpago.la/pos/korens-srv-simulacion"
+      "mercadoPagoUrl": "https://mpago.li/2r26TTz"
     }
   ],
   "leads": [
