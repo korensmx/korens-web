@@ -354,7 +354,10 @@
       "meetLink": "https://meet.google.com/kor-pla-man",
       "id": "lead-1788544456019-5qvmv",
       "status": "Iniciado",
-      "createdAt": "2026-09-04T17:54:16.019Z"
+      "createdAt": "2026-09-04T17:54:16.019Z",
+      "calendarUrl": "https://calendar.google.com/calendar/render?action=TEMPLATE&text=Sesi%C3%B3n%20Estrat%C3%A9gica%20KORENS%C2%AE%20-%20Paquete%20Platinum%20con%20Ing.%20Manuel%20Cordero&dates=20260907T161500Z/20260907T170000Z&details=Sesi%C3%B3n%20Estrat%C3%A9gica%201%20a%201%20de%2045%20minutos%20con%20tu%20consultor%20KORENS%C2%AE.%0A%0A%F0%9F%91%A4%20Cliente%3A%20Ing.%20Manuel%20Cordero%0A%F0%9F%93%B1%20WhatsApp%3A%20525512345678%0A%E2%9C%89%EF%B8%8F%20Email%3A%20m.cordero%40empresa.com%0A%F0%9F%92%BC%20Servicio%3A%20Paquete%20Platinum%0A%F0%9F%92%BB%20Enlace%20Google%20Meet%3A%20https%3A//meet.google.com/kor-pla-man%0A%F0%9F%8F%A2%20Organiza%3A%20KORENS%C2%AE%20%28korensmx%40gmail.com%29%0A%0A%E2%9A%A0%EF%B8%8F%20CONDICI%C3%93N%20OBLIGATORIA%3A%20La%20sesi%C3%B3n%20se%20llevar%C3%A1%20a%20cabo%20formalmente%20una%20vez%20confirmado%20el%20pago%20en%20Mercado%20Pago.&location=https%3A//meet.google.com/kor-pla-man&add=korensmx@gmail.com,m.cordero%40empresa.com&ctz=America/Mexico_City",
+      "scheduledIsoStart": "2026-09-07T16:15:00.000Z",
+      "scheduledIsoEnd": "2026-09-07T17:00:00.000Z"
     },
     {
       "name": "Valeria Morales",

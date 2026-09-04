@@ -10,8 +10,12 @@ export interface Lead {
   notes?: string;
   scheduledDate?: string;
   scheduledTime?: string;
+  scheduledIsoStart?: string;
+  scheduledIsoEnd?: string;
   meetLink?: string;
   calendarUrl?: string;
+  googleSynced?: boolean;
+  googleEventId?: string;
   createdAt: string;
 }
 
@@ -74,6 +78,7 @@ export interface GoogleIntegration {
   lastSyncAt?: string;
   clientId?: string;
   clientSecret?: string;
+  webhookUrl?: string;
 }
 
 export interface FacebookPost {

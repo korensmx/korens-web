@@ -15,8 +15,13 @@ import {
   AlertTriangle,
   ExternalLink,
   Sparkles,
+  Download,
+  CreditCard,
+  Copy,
+  Check,
 } from "lucide-react";
 import { Product } from "@/lib/types";
+import { buildGoogleCalendarUrl, calculateMeetingIsoDates } from "@/lib/calendar";
 
 interface CheckoutModalProps {
   product: Product | null;
@@ -87,32 +92,31 @@ export default function CheckoutModal({ product, isOpen, onClose }: CheckoutModa
 
   // Google Calendar Web Link
   const getGoogleCalendarUrl = () => {
-    if (!currentDay) return "";
-    const slot = timeSlots.find((s) => s.label === selectedTimeSlot) || timeSlots[1];
-    const startIso = new Date(currentDay.dateObj);
-    startIso.setHours(slot.startHour, slot.startMin, 0, 0);
-    const endIso = new Date(currentDay.dateObj);
-    endIso.setHours(slot.endHour, slot.endMin, 0, 0);
-
-    const formatGCal = (date: Date) =>
-      date.toISOString().replace(/-|:|\.\d+/g, "");
-
-    const title = encodeURIComponent(`Sesión Estratégica KORENS® - ${product.name}`);
-    const details = encodeURIComponent(
-      `Sesión Estratégica 1 a 1 de 45 minutos con tu consultor KORENS.\n\n` +
-      `👤 Cliente: ${name}\n` +
-      `📱 WhatsApp: ${whatsapp}\n` +
-      `✉️ Correo: ${email}\n` +
-      `💼 Servicio: ${product.name}\n` +
-      `💻 Enlace Google Meet: ${meetLink}\n` +
-      `🏢 Organiza: KORENS® Consultoría Estratégica (korensmx@gmail.com)\n\n` +
-      `⚠️ CONDICIÓN OBLIGATORIA: La sesión virtual en Google Meet se llevará a cabo ÚNICAMENTE una vez que tu pago en Mercado Pago esté 100% confirmado.`
-    );
-    const location = encodeURIComponent(meetLink);
-    const dates = `${formatGCal(startIso)}/${formatGCal(endIso)}`;
-    const attendees = email.trim() ? `korensmx@gmail.com,${encodeURIComponent(email.trim())}` : "korensmx@gmail.com";
-
-    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dates}&details=${details}&location=${location}&add=${attendees}`;
+    if (!currentDay || !selectedTimeSlot) return "";
+    const dates = calculateMeetingIsoDates(currentDay.dateString, selectedTimeSlot);
+    return buildGoogleCalendarUrl({
+      title: `Sesión Estratégica KORENS® - ${product.name} con ${name || "Cliente"}`,
+      description: [
+        `Sesión Estratégica 1 a 1 de 45 minutos con tu consultor KORENS®.`,
+        ``,
+        `👤 Cliente: ${name}`,
+        `📱 WhatsApp: ${whatsapp}`,
+        `✉️ Correo: ${email}`,
+        `💼 Servicio: ${product.name}`,
+        `💻 Enlace Google Meet: ${meetLink}`,
+        `🏢 Organiza: KORENS® Consultoría Estratégica (korensmx@gmail.com)`,
+        ``,
+        `⚠️ CONDICIÓN OBLIGATORIA: La sesión virtual en Google Meet se llevará a cabo ÚNICAMENTE una vez que tu pago en Mercado Pago esté 100% confirmado.`,
+      ].join("\n"),
+      meetLink,
+      startIso: dates.startIso,
+      endIso: dates.endIso,
+      clientName: name,
+      clientEmail: email,
+      clientPhone: whatsapp,
+      ownerEmail: "korensmx@gmail.com",
+      productTitle: product.name,
+    });
   };
 
   const handleStep1Submit = (e: React.FormEvent) => {
@@ -138,6 +142,8 @@ export default function CheckoutModal({ product, isOpen, onClose }: CheckoutModa
     setError("");
     setLoading(true);
 
+    const calUrl = getGoogleCalendarUrl();
+
     try {
       const res = await fetch("/api/leads", {
         method: "POST",
@@ -151,7 +157,7 @@ export default function CheckoutModal({ product, isOpen, onClose }: CheckoutModa
           scheduledDate: currentDay.fullDate,
           scheduledTime: selectedTimeSlot,
           meetLink: meetLink,
-          calendarUrl: getGoogleCalendarUrl(),
+          calendarUrl: calUrl,
         }),
       });
 
@@ -159,13 +165,17 @@ export default function CheckoutModal({ product, isOpen, onClose }: CheckoutModa
 
       if (data.success) {
         setSuccessLead(data.lead);
+        setLoading(false);
 
-        // Redirigir a Mercado Pago
-        const targetUrl = data.mercadoPagoUrl || product.mercadoPagoUrl || "https://www.mercadopago.com.mx";
-
-        setTimeout(() => {
-          window.location.href = targetUrl;
-        }, 1500);
+        // 1. Abrir Google Calendar en una pestaña nueva automáticamente
+        const targetCal = data.calendarUrl || calUrl;
+        if (targetCal) {
+          try {
+            window.open(targetCal, "_blank");
+          } catch (e) {
+            console.error("Popup blocked:", e);
+          }
+        }
       } else {
         setError(data.error || "Ocurrió un error al registrar tu cita.");
         setLoading(false);
@@ -428,17 +438,71 @@ export default function CheckoutModal({ product, isOpen, onClose }: CheckoutModa
           {step === 3 && (
             <div className="space-y-4">
               {successLead ? (
-                <div className="py-8 text-center space-y-3">
+                <div className="py-5 text-center space-y-4 animate-in fade-in zoom-in-95 duration-200">
                   <div className="inline-flex p-3 rounded-full bg-emerald-500/20 text-emerald-400">
-                    <CheckCircle2 className="w-12 h-12 animate-bounce" />
+                    <CheckCircle2 className="w-12 h-12 animate-pulse" />
                   </div>
-                  <h4 className="text-lg font-bold text-white">¡Pre-reserva completada!</h4>
-                  <p className="text-xs text-slate-300 max-w-sm mx-auto leading-relaxed">
-                    Transfiriéndote a <strong>Mercado Pago</strong> para completar tu pago y confirmar formalmente tu sesión de Google Meet...
-                  </p>
-                  <div className="flex items-center justify-center gap-2 text-korens-orange text-xs pt-2">
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Conectando con Mercado Pago...</span>
+                  <div className="space-y-1">
+                    <h4 className="text-xl font-black text-white">¡Cita Agendada y Sincronizada!</h4>
+                    <p className="text-xs text-slate-300 max-w-md mx-auto leading-relaxed">
+                      Tu reunión virtual en <strong className="text-emerald-400">Google Meet</strong> y fecha en <strong className="text-emerald-400">Google Calendar</strong> han sido registradas para el:
+                    </p>
+                    <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs font-bold text-white max-w-sm mx-auto">
+                      📅 {currentDay.fullDate} • ⏰ {selectedTimeSlot} (45 min)
+                    </div>
+                  </div>
+
+                  {/* Tarjeta de Acciones Inmediatas */}
+                  <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 text-left space-y-3">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-slate-400">Sala Google Meet:</span>
+                      <a
+                        href={meetLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-emerald-400 hover:underline font-mono text-xs flex items-center gap-1 font-bold"
+                      >
+                        <Video className="w-3.5 h-3.5" />
+                        <span>{meetLink}</span>
+                      </a>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2 border-t border-slate-800">
+                      <a
+                        href={getGoogleCalendarUrl()}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex items-center justify-center gap-1.5 border border-slate-700 transition-colors cursor-pointer"
+                      >
+                        <Calendar className="w-3.5 h-3.5 text-korens-orange" />
+                        <span>Ver en Google Calendar</span>
+                      </a>
+
+                      <a
+                        href={`/api/calendar/ics?id=${successLead.id}`}
+                        download
+                        className="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex items-center justify-center gap-1.5 border border-slate-700 transition-colors cursor-pointer"
+                      >
+                        <Download className="w-3.5 h-3.5 text-cyan-400" />
+                        <span>Descargar Cita (.ics)</span>
+                      </a>
+                    </div>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-[11px] text-amber-200 leading-relaxed text-left">
+                    ⚠️ <strong>Condición de Confirmación KORENS®:</strong> Tu horario y sala privada de Google Meet quedan apartados en el sistema. La sesión se llevará a cabo de manera formal una vez completado y confirmado tu pago en Mercado Pago.
+                  </div>
+
+                  {/* Botón Principal a Mercado Pago */}
+                  <div className="pt-2">
+                    <a
+                      href={product.mercadoPagoUrl || "https://www.mercadopago.com.mx"}
+                      className="w-full btn-orange-glow text-white font-black py-4 px-6 rounded-xl flex items-center justify-center gap-2 shadow-2xl text-sm sm:text-base cursor-pointer"
+                    >
+                      <CreditCard className="w-4 h-4" />
+                      <span>Proceder al Pago Seguro en Mercado Pago (${product.offerPrice} MXN)</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </a>
                   </div>
                 </div>
               ) : (

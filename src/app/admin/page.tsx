@@ -35,6 +35,8 @@ import {
   Radio,
   Facebook,
   Youtube,
+  Copy,
+  Code,
 } from "lucide-react";
 import { Lead, Product, BlogPost, BlogComment, Review, SiteContent, DiagnosticSubmission, GoogleIntegration, SocialFeedPost, FacebookPost, FacebookIntegration } from "@/lib/types";
 
@@ -64,6 +66,8 @@ export default function AdminDashboardPage() {
   });
   const [googleLoading, setGoogleLoading] = useState(false);
   const [googleMessage, setGoogleMessage] = useState("");
+  const [webhookInput, setWebhookInput] = useState("");
+  const [copiedScript, setCopiedScript] = useState(false);
 
   // Social Feed states
   const [socialPosts, setSocialPosts] = useState<SocialFeedPost[]>([]);
@@ -171,6 +175,9 @@ export default function AdminDashboardPage() {
         setSiteContent(cmsRes.content);
         if (cmsRes.content.googleIntegration) {
           setGoogleStatus(cmsRes.content.googleIntegration);
+          if (cmsRes.content.googleIntegration.webhookUrl) {
+            setWebhookInput(cmsRes.content.googleIntegration.webhookUrl);
+          }
         }
         if (cmsRes.content.socialFeedPosts) {
           setSocialPosts(cmsRes.content.socialFeedPosts);
@@ -277,6 +284,54 @@ export default function AdminDashboardPage() {
       }
     } catch (e) {
       console.error(e);
+    }
+  };
+
+  const handleSaveWebhook = async () => {
+    setGoogleLoading(true);
+    setGoogleMessage("");
+    try {
+      const res = await fetch("/api/google/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "save-webhook", webhookUrl: webhookInput }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setGoogleStatus(data.integration);
+        setGoogleMessage(data.message);
+        showNotification("Webhook de Google Apps Script guardado correctamente");
+      } else {
+        setGoogleMessage(data.error || "Error al guardar el webhook");
+      }
+    } catch (e) {
+      setGoogleMessage("Error de conexión al guardar webhook");
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
+
+  const handleTestWebhook = async () => {
+    setGoogleLoading(true);
+    setGoogleMessage("");
+    try {
+      const res = await fetch("/api/google/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "test", email: googleStatus.email, webhookUrl: webhookInput }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setGoogleStatus(data.integration || googleStatus);
+        setGoogleMessage(data.message);
+        showNotification("¡Prueba de sincronización enviada con éxito a Google Calendar!");
+      } else {
+        setGoogleMessage(data.error || "Error al enviar prueba al webhook");
+      }
+    } catch (e) {
+      setGoogleMessage("Error de conexión al enviar prueba");
+    } finally {
+      setGoogleLoading(false);
     }
   };
 
@@ -905,36 +960,44 @@ export default function AdminDashboardPage() {
                         <td className="p-3.5 font-black text-korens-orange">${lead.price} MXN</td>
                         <td className="p-3.5">
                           {lead.scheduledDate ? (
-                            <div className="space-y-1.5">
-                              <span className="font-bold text-emerald-400 block">
-                                📅 {lead.scheduledDate}
-                              </span>
-                              <span className="text-slate-300 font-semibold block text-[11px]">
-                                ⏰ {lead.scheduledTime} (45 min)
-                              </span>
-                              <div className="flex flex-col gap-1 pt-1">
-                                {lead.meetLink && (
-                                  <a
-                                    href={lead.meetLink}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-1 text-[10px] text-cyan-400 hover:text-cyan-300 underline font-mono"
-                                  >
-                                    <Video className="w-3 h-3" />
-                                    <span>Abrir Google Meet</span>
-                                  </a>
-                                )}
-                                {lead.calendarUrl && (
-                                  <a
-                                    href={lead.calendarUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-1 text-[10px] text-amber-400 hover:text-amber-300 font-medium"
-                                  >
-                                    <Calendar className="w-3 h-3" />
-                                    <span>Añadir a Google Calendar (korensmx@gmail.com)</span>
-                                  </a>
-                                )}
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-1.5 font-bold text-emerald-400">
+                                <span>📅 {lead.scheduledDate}</span>
+                              </div>
+                              <div className="text-slate-300 font-semibold text-[11px]">
+                                <span>⏰ {lead.scheduledTime} (45 min)</span>
+                              </div>
+                              <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                                <a
+                                  href={lead.calendarUrl || `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(`Sesión KORENS® - ${lead.productTitle} con ${lead.name}`)}&dates=20260907T161500Z/20260907T170000Z&details=${encodeURIComponent(`Cliente: ${lead.name}\nWhatsApp: ${lead.whatsapp}\nEmail: ${lead.email}\nServicio: ${lead.productTitle}\nGoogle Meet: ${lead.meetLink || 'https://meet.google.com/kor-pla-man'}\n\n⚠️ Sesión confirmada al acreditarse el pago en Mercado Pago.`)}&location=${encodeURIComponent(lead.meetLink || 'Google Meet')}&add=korensmx@gmail.com,${encodeURIComponent(lead.email || '')}&ctz=America/Mexico_City`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="px-2.5 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-[10px] font-bold flex items-center gap-1 transition-colors cursor-pointer"
+                                  title="Abre Google Calendar para guardar el evento con 1 clic"
+                                >
+                                  <Calendar className="w-3 h-3 text-amber-400" />
+                                  <span>Añadir a Calendar</span>
+                                </a>
+
+                                <a
+                                  href={lead.meetLink || "https://meet.google.com/new"}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="px-2.5 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold flex items-center gap-1 font-mono transition-colors"
+                                >
+                                  <Video className="w-3 h-3 text-emerald-400" />
+                                  <span>Google Meet</span>
+                                </a>
+
+                                <a
+                                  href={`/api/calendar/ics?id=${lead.id}`}
+                                  download
+                                  className="px-2 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-[10px] flex items-center gap-1 transition-colors"
+                                  title="Descargar invitación de calendario .ics"
+                                >
+                                  <Download className="w-3 h-3" />
+                                  <span>.ics</span>
+                                </a>
                               </div>
                             </div>
                           ) : (
@@ -1821,6 +1884,198 @@ export default function AdminDashboardPage() {
                   <Calendar className="w-3.5 h-3.5" />
                   <span>Sincronizar Todas las Citas a Google Calendar</span>
                 </button>
+              </div>
+
+              {/* Listado de Citas Agendadas con Botones 1-Clic */}
+              <div className="p-5 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-emerald-400" />
+                    <h4 className="text-sm font-bold text-white">
+                      Citas Agendadas Activas ({leads.filter((l) => !!l.scheduledDate).length})
+                    </h4>
+                  </div>
+                  <span className="text-[11px] text-slate-400">
+                    Sincronización Inmediata con Google Calendar & Meet
+                  </span>
+                </div>
+
+                {leads.filter((l) => !!l.scheduledDate).length === 0 ? (
+                  <p className="text-xs text-slate-500 italic py-3 text-center">
+                    Aún no hay citas agendadas registradas.
+                  </p>
+                ) : (
+                  <div className="space-y-3">
+                    {leads
+                      .filter((l) => !!l.scheduledDate)
+                      .map((lead) => (
+                        <div
+                          key={lead.id}
+                          className="p-4 rounded-xl bg-slate-900 border border-slate-800 hover:border-emerald-500/40 transition-colors flex flex-col md:flex-row md:items-center justify-between gap-4"
+                        >
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-white text-sm">{lead.name}</span>
+                              <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-black">
+                                {lead.productTitle}
+                              </span>
+                            </div>
+                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-400">
+                              <span>📅 <strong className="text-emerald-300">{lead.scheduledDate}</strong></span>
+                              <span>⏰ <strong className="text-slate-200">{lead.scheduledTime}</strong></span>
+                              <span>📱 <a href={`https://wa.me/${lead.whatsapp.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="text-korens-orange hover:underline">{lead.whatsapp}</a></span>
+                              <span>✉️ {lead.email}</span>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-wrap items-center gap-2">
+                            <a
+                              href={
+                                lead.calendarUrl ||
+                                `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(`Sesión KORENS® - ${lead.productTitle} con ${lead.name}`)}&dates=20260907T161500Z/20260907T170000Z&details=${encodeURIComponent(`Cliente: ${lead.name}\nWhatsApp: ${lead.whatsapp}\nEmail: ${lead.email}\nServicio: ${lead.productTitle}\nGoogle Meet: ${lead.meetLink || 'https://meet.google.com/kor-pla-man'}\n\n⚠️ Sesión confirmada al acreditarse el pago en Mercado Pago.`)}&location=${encodeURIComponent(lead.meetLink || 'Google Meet')}&add=korensmx@gmail.com,${encodeURIComponent(lead.email || '')}&ctz=America/Mexico_City`
+                              }
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="px-3 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                              title="Abre Google Calendar para agregar este evento a tu calendario con 1 solo clic"
+                            >
+                              <Calendar className="w-3.5 h-3.5 text-amber-400" />
+                              <span>Añadir a mi Google Calendar</span>
+                            </a>
+
+                            <a
+                              href={lead.meetLink || "https://meet.google.com/new"}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="px-3 py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-xs font-bold flex items-center gap-1.5 font-mono transition-colors"
+                              title="Entrar a la sala de Google Meet asignada a este cliente"
+                            >
+                              <Video className="w-3.5 h-3.5 text-emerald-400" />
+                              <span>Abrir Meet</span>
+                            </a>
+
+                            <a
+                              href={`/api/calendar/ics?id=${lead.id}`}
+                              download
+                              className="px-2.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs flex items-center gap-1 transition-colors"
+                              title="Descargar archivo .ics estándar para Apple Calendar o Outlook"
+                            >
+                              <Download className="w-3.5 h-3.5" />
+                              <span>.ics</span>
+                            </a>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Sincronización Automática 100% en Segundo Plano con Google Apps Script */}
+              <div className="p-5 rounded-2xl bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 border border-slate-800 space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center text-emerald-400">
+                      <Code className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-white">
+                        Sincronización 100% Automática en Segundo Plano (Opcional)
+                      </h4>
+                      <p className="text-[11px] text-slate-400">
+                        Crea los eventos automáticamente en tu Google Calendar sin necesidad de abrir pestañas.
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 self-start sm:self-auto">
+                    Google Apps Script Webhook
+                  </span>
+                </div>
+
+                <div className="text-xs text-slate-300 space-y-2 bg-slate-950/60 p-4 rounded-xl border border-slate-800/80">
+                  <p className="font-semibold text-emerald-300">
+                    ¿Cómo activar la creación directa y silenciosa de citas en tu Google Calendar (1 minuto)?
+                  </p>
+                  <ol className="list-decimal list-inside space-y-1 text-[11px] text-slate-400 leading-relaxed">
+                    <li>Entra a <a href="https://script.google.com" target="_blank" rel="noopener noreferrer" className="text-korens-orange hover:underline font-bold">script.google.com</a> con tu cuenta oficial <strong>korensmx@gmail.com</strong> y haz clic en <strong>Nuevo Proyecto</strong>.</li>
+                    <li>Reemplaza el código por el script que aparece a continuación y guárdalo (Ctrl+S / Cmd+S).</li>
+                    <li>Haz clic en <strong>Implementar &gt; Nueva implementación</strong>, selecciona tipo <strong>Aplicación web</strong>, en <em>&quot;Quién tiene acceso&quot;</em> elige <strong>Cualquier persona</strong> y copia la URL generada.</li>
+                    <li>Pega la URL del webhook en el campo de abajo y haz clic en <strong>Guardar Webhook</strong>.</li>
+                  </ol>
+
+                  {/* Código Apps Script */}
+                  <div className="relative mt-3">
+                    <div className="absolute top-2 right-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigator.clipboard.writeText(`function doPost(e) {
+  var data = JSON.parse(e.postData.contents);
+  var cal = CalendarApp.getDefaultCalendar();
+  var event = cal.createEvent(data.title, new Date(data.startIso), new Date(data.endIso), {
+    description: data.description + "\\n\\nGoogle Meet: " + data.meetLink,
+    guests: data.clientEmail + "," + data.ownerEmail,
+    sendInvites: true
+  });
+  return ContentService.createTextOutput(JSON.stringify({ success: true, eventId: event.getId() })).setMimeType(ContentService.MimeType.JSON);
+}`);
+                          setCopiedScript(true);
+                          setTimeout(() => setCopiedScript(false), 3000);
+                        }}
+                        className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold flex items-center gap-1 border border-slate-700 cursor-pointer"
+                      >
+                        {copiedScript ? <CheckCheck className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                        <span>{copiedScript ? "¡Copiado!" : "Copiar Script"}</span>
+                      </button>
+                    </div>
+                    <pre className="p-3.5 rounded-xl bg-black/60 border border-slate-800 text-[10px] font-mono text-emerald-300 overflow-x-auto leading-relaxed">
+{`function doPost(e) {
+  var data = JSON.parse(e.postData.contents);
+  var cal = CalendarApp.getDefaultCalendar();
+  var event = cal.createEvent(data.title, new Date(data.startIso), new Date(data.endIso), {
+    description: data.description + "\\n\\nGoogle Meet: " + data.meetLink,
+    guests: data.clientEmail + "," + data.ownerEmail,
+    sendInvites: true
+  });
+  return ContentService.createTextOutput(JSON.stringify({ success: true, eventId: event.getId() })).setMimeType(ContentService.MimeType.JSON);
+}`}
+                    </pre>
+                  </div>
+                </div>
+
+                {/* Input del Webhook URL */}
+                <div className="space-y-2 pt-2">
+                  <label className="text-xs font-bold text-white flex items-center gap-1.5">
+                    <Link2 className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>URL del Webhook de Google Apps Script</span>
+                  </label>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <input
+                      type="url"
+                      value={webhookInput}
+                      onChange={(e) => setWebhookInput(e.target.value)}
+                      placeholder="https://script.google.com/macros/s/.../exec"
+                      className="flex-1 px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs placeholder:text-slate-600 focus:outline-none focus:border-emerald-500 font-mono"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleSaveWebhook}
+                      disabled={googleLoading}
+                      className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50 shrink-0"
+                    >
+                      <Save className="w-3.5 h-3.5" />
+                      <span>Guardar Webhook</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleTestWebhook}
+                      disabled={googleLoading || !webhookInput.trim()}
+                      className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50 shrink-0"
+                    >
+                      <RefreshCw className={`w-3.5 h-3.5 text-emerald-400 ${googleLoading ? "animate-spin" : ""}`} />
+                      <span>Probar Webhook</span>
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

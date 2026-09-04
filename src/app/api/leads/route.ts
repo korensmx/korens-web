@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getLeads, addLead, updateLeadStatus, getProductById } from "@/lib/db";
+import { getLeads, addLead, updateLeadStatus, getProductById, getSiteContent } from "@/lib/db";
+import { calculateMeetingIsoDates, buildGoogleCalendarUrl, sendGoogleAppsScriptWebhook } from "@/lib/calendar";
 
 export async function GET() {
   try {
@@ -28,6 +29,70 @@ export async function POST(req: NextRequest) {
     const price = product ? product.offerPrice : 0;
     const mercadoPagoUrl = product?.mercadoPagoUrl || "https://www.mercadopago.com.mx";
 
+    let startIso: string | undefined;
+    let endIso: string | undefined;
+    let finalMeetLink = meetLink;
+    let finalCalendarUrl = calendarUrl;
+
+    if (scheduledDate) {
+      const dates = calculateMeetingIsoDates(scheduledDate, scheduledTime || "10:15 - 11:00");
+      startIso = dates.startIso;
+      endIso = dates.endIso;
+
+      if (!finalMeetLink) {
+        finalMeetLink = "https://meet.google.com/kor-ens-ses";
+      }
+
+      const title = `Sesión Estratégica KORENS® - ${productTitle} con ${name.trim()}`;
+      const description = [
+        `Sesión Estratégica 1 a 1 de 45 minutos con tu consultor KORENS®.`,
+        ``,
+        `👤 Cliente: ${name.trim()}`,
+        `📱 WhatsApp: ${whatsapp.trim()}`,
+        `✉️ Email: ${email.trim().toLowerCase()}`,
+        `💼 Servicio: ${productTitle}`,
+        `💻 Enlace Google Meet: ${finalMeetLink}`,
+        `🏢 Organiza: KORENS® (korensmx@gmail.com)`,
+        ``,
+        `⚠️ CONDICIÓN OBLIGATORIA: La sesión se llevará a cabo formalmente una vez confirmado el pago en Mercado Pago.`,
+      ].join("\n");
+
+      finalCalendarUrl = buildGoogleCalendarUrl({
+        title,
+        description,
+        meetLink: finalMeetLink,
+        startIso,
+        endIso,
+        clientName: name.trim(),
+        clientEmail: email.trim().toLowerCase(),
+        clientPhone: whatsapp.trim(),
+        ownerEmail: "korensmx@gmail.com",
+        productTitle,
+      });
+
+      // Disparar sincronización automática en Google Apps Script si está configurado
+      try {
+        const siteContent = getSiteContent();
+        const webhookUrl = siteContent.googleIntegration?.webhookUrl;
+        if (webhookUrl) {
+          sendGoogleAppsScriptWebhook(webhookUrl, {
+            title,
+            description,
+            meetLink: finalMeetLink,
+            startIso,
+            endIso,
+            clientName: name.trim(),
+            clientEmail: email.trim().toLowerCase(),
+            clientPhone: whatsapp.trim(),
+            ownerEmail: siteContent.googleIntegration?.email || "korensmx@gmail.com",
+            productTitle,
+          }).catch((err) => console.error("Error al enviar webhook de Google:", err));
+        }
+      } catch (err) {
+        console.error("Error al verificar webhook:", err);
+      }
+    }
+
     const savedLead = addLead({
       name: name.trim(),
       email: email.trim().toLowerCase(),
@@ -38,14 +103,20 @@ export async function POST(req: NextRequest) {
       notes: notes || "",
       scheduledDate: scheduledDate || undefined,
       scheduledTime: scheduledTime || undefined,
-      meetLink: meetLink || undefined,
-      calendarUrl: calendarUrl || undefined,
+      scheduledIsoStart: startIso,
+      scheduledIsoEnd: endIso,
+      meetLink: finalMeetLink || undefined,
+      calendarUrl: finalCalendarUrl || undefined,
+      googleSynced: false,
     });
 
     return NextResponse.json({
       success: true,
       lead: savedLead,
       mercadoPagoUrl,
+      calendarUrl: finalCalendarUrl,
+      meetLink: finalMeetLink,
+      icsUrl: `/api/calendar/ics?id=${savedLead.id}`,
     });
   } catch (error) {
     console.error("Error creating lead:", error);
