@@ -47,6 +47,8 @@ export default function AdminDashboardPage() {
 
   // Product edit state
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [isSavingProduct, setIsSavingProduct] = useState(false);
+  const [productSaveError, setProductSaveError] = useState("");
 
   // New blog post state
   const [isCreatingPost, setIsCreatingPost] = useState(false);
@@ -167,6 +169,8 @@ export default function AdminDashboardPage() {
   const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingProduct) return;
+    setIsSavingProduct(true);
+    setProductSaveError("");
 
     try {
       const res = await fetch("/api/products", {
@@ -175,13 +179,18 @@ export default function AdminDashboardPage() {
         body: JSON.stringify(editingProduct),
       });
       const data = await res.json();
-      if (data.success) {
+      if (data.success && data.product) {
         setProducts(products.map((p) => (p.id === editingProduct.id ? data.product : p)));
         setEditingProduct(null);
         showNotification("Producto y link de Mercado Pago actualizados con éxito");
+      } else {
+        setProductSaveError(data.error || "No se pudo actualizar el producto");
       }
     } catch (e) {
       console.error(e);
+      setProductSaveError("Error de conexión al guardar producto");
+    } finally {
+      setIsSavingProduct(false);
     }
   };
 
@@ -702,6 +711,11 @@ export default function AdminDashboardPage() {
                   </p>
 
                   <form onSubmit={handleSaveProduct} className="space-y-4">
+                    {productSaveError && (
+                      <div className="p-3 rounded-xl bg-rose-500/20 border border-rose-500/40 text-rose-300 text-xs font-medium">
+                        {productSaveError}
+                      </div>
+                    )}
                     <div className="grid grid-cols-3 gap-3">
                       <div>
                         <label className="block text-xs font-semibold text-slate-300 mb-1">
@@ -787,10 +801,11 @@ export default function AdminDashboardPage() {
                       </button>
                       <button
                         type="submit"
-                        className="btn-orange-glow text-white text-xs font-bold px-5 py-2.5 rounded-xl flex items-center gap-1.5"
+                        disabled={isSavingProduct}
+                        className="btn-orange-glow text-white text-xs font-bold px-5 py-2.5 rounded-xl flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
                       >
                         <Save className="w-4 h-4" />
-                        <span>Guardar Cambios</span>
+                        <span>{isSavingProduct ? "Guardando..." : "Guardar Cambios"}</span>
                       </button>
                     </div>
                   </form>

@@ -97,7 +97,7 @@ const DEFAULT_DB: DatabaseSchema = {
         "Estrategia de palabras clave para pasar filtros de robots ATS corporativos",
         "Atención personalizada con consultor senior KORENS"
       ],
-      mercadoPagoUrl: "https://mpago.la/pos/korens-platinum"
+      mercadoPagoUrl: "https://mpago.li/1LSRZY2"
     },
     {
       id: "srv-cv",
@@ -347,27 +347,65 @@ La negociación salarial nunca debe basarse en tus gastos personales ("tengo que
   diagnostics: []
 };
 
+const TMP_DB_FILE = path.join("/tmp", "korens_db.json");
+
+declare global {
+  var __korens_db_instance: DatabaseSchema | undefined;
+}
+
 function ensureDb(): DatabaseSchema {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
+  if (globalThis.__korens_db_instance) {
+    return globalThis.__korens_db_instance;
   }
-  if (!fs.existsSync(DB_FILE)) {
-    fs.writeFileSync(DB_FILE, JSON.stringify(DEFAULT_DB, null, 2), "utf-8");
-    return DEFAULT_DB;
+
+  // 1. Try reading from /tmp (persisted during serverless container lifecycle)
+  if (fs.existsSync(TMP_DB_FILE)) {
+    try {
+      const raw = fs.readFileSync(TMP_DB_FILE, "utf-8");
+      const data = JSON.parse(raw);
+      globalThis.__korens_db_instance = { ...DEFAULT_DB, ...data };
+      return globalThis.__korens_db_instance!;
+    } catch (err) {
+      console.warn("Could not read /tmp database:", err);
+    }
   }
-  try {
-    const raw = fs.readFileSync(DB_FILE, "utf-8");
-    const data = JSON.parse(raw);
-    return { ...DEFAULT_DB, ...data };
-  } catch (err) {
-    console.error("Error reading database, using defaults:", err);
-    return DEFAULT_DB;
+
+  // 2. Try reading from project data file
+  if (fs.existsSync(DB_FILE)) {
+    try {
+      const raw = fs.readFileSync(DB_FILE, "utf-8");
+      const data = JSON.parse(raw);
+      globalThis.__korens_db_instance = { ...DEFAULT_DB, ...data };
+      return globalThis.__korens_db_instance!;
+    } catch (err) {
+      console.error("Error reading database from DB_FILE:", err);
+    }
   }
+
+  globalThis.__korens_db_instance = { ...DEFAULT_DB };
+  return globalThis.__korens_db_instance!;
 }
 
 function writeDb(data: DatabaseSchema): void {
-  ensureDb();
-  fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), "utf-8");
+  // Always update in-memory instance
+  globalThis.__korens_db_instance = data;
+
+  // Try writing to local project directory (works in local dev)
+  try {
+    if (!fs.existsSync(DATA_DIR)) {
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+    }
+    fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), "utf-8");
+  } catch (err) {
+    // Expected in Vercel serverless (read-only filesystem)
+  }
+
+  // Always write to /tmp (writable in Vercel serverless)
+  try {
+    fs.writeFileSync(TMP_DB_FILE, JSON.stringify(data, null, 2), "utf-8");
+  } catch (err) {
+    console.warn("Could not write to /tmp database:", err);
+  }
 }
 
 export function getSiteContent(): SiteContent {
