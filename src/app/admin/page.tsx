@@ -38,7 +38,7 @@ import {
   Copy,
   Code,
 } from "lucide-react";
-import { Lead, Product, BlogPost, BlogComment, Review, SiteContent, DiagnosticSubmission, GoogleIntegration, SocialFeedPost, FacebookPost, FacebookIntegration } from "@/lib/types";
+import { Lead, Product, BlogPost, BlogComment, Review, SiteContent, DiagnosticSubmission, GoogleIntegration, SocialFeedPost, FacebookPost, FacebookIntegration, YouTubeVideo, YouTubeIntegration } from "@/lib/types";
 
 export default function AdminDashboardPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -98,6 +98,13 @@ export default function AdminDashboardPage() {
   const [isSavingFb, setIsSavingFb] = useState(false);
   const [fbSyncMessage, setFbSyncMessage] = useState("");
 
+  // YouTube Integration states
+  const [youtubeVideos, setYoutubeVideos] = useState<YouTubeVideo[]>([]);
+  const [isSyncingYouTube, setIsSyncingYouTube] = useState(false);
+  const [youtubeSyncMessage, setYoutubeSyncMessage] = useState("");
+  const [manualVideoUrl, setManualVideoUrl] = useState("");
+  const [isAddingVideo, setIsAddingVideo] = useState(false);
+
   const [loading, setLoading] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState("");
 
@@ -152,7 +159,7 @@ export default function AdminDashboardPage() {
   const fetchAllData = async () => {
     setLoading(true);
     try {
-      const [leadsRes, prodsRes, blogRes, commRes, revRes, cmsRes, diagRes, fbRes] = await Promise.all([
+      const [leadsRes, prodsRes, blogRes, commRes, revRes, cmsRes, diagRes, fbRes, ytRes] = await Promise.all([
         fetch("/api/leads").then((r) => r.json()),
         fetch("/api/products").then((r) => r.json()),
         fetch("/api/blog").then((r) => r.json()),
@@ -161,6 +168,7 @@ export default function AdminDashboardPage() {
         fetch("/api/cms").then((r) => r.json()),
         fetch("/api/diagnostics").then((r) => r.json()),
         fetch("/api/facebook/sync").then((r) => r.json()).catch(() => ({ success: false })),
+        fetch("/api/youtube/sync").then((r) => r.json()).catch(() => ({ success: false })),
       ]);
 
       if (leadsRes.success) setLeads(leadsRes.leads || []);
@@ -171,6 +179,9 @@ export default function AdminDashboardPage() {
       if (fbRes.success) {
         if (fbRes.integration) setFacebookIntegration(fbRes.integration);
         if (fbRes.posts && Array.isArray(fbRes.posts)) setFacebookPosts(fbRes.posts);
+      }
+      if (ytRes.success && ytRes.videos) {
+        setYoutubeVideos(ytRes.videos);
       }
       if (cmsRes.success && cmsRes.content) {
         setSiteContent(cmsRes.content);
@@ -188,6 +199,9 @@ export default function AdminDashboardPage() {
         }
         if (cmsRes.content.facebookPosts && (!fbRes.success || !fbRes.posts)) {
           setFacebookPosts(cmsRes.content.facebookPosts);
+        }
+        if (cmsRes.content.youtubeVideos && (!ytRes.success || !ytRes.videos)) {
+          setYoutubeVideos(cmsRes.content.youtubeVideos);
         }
       }
       if (diagRes.success) setDiagnostics(diagRes.diagnostics || []);
@@ -451,6 +465,77 @@ export default function AdminDashboardPage() {
       alert("Error al guardar cambios de Facebook");
     } finally {
       setIsSavingFb(false);
+    }
+  };
+
+  // YouTube Integration Handlers
+  const handleSyncYouTube = async () => {
+    setIsSyncingYouTube(true);
+    setYoutubeSyncMessage("");
+    try {
+      const res = await fetch("/api/youtube/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "sync" }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        if (data.videos && Array.isArray(data.videos)) {
+          setYoutubeVideos(data.videos);
+        }
+        setYoutubeSyncMessage(data.message || "¡Canal de YouTube sincronizado con éxito!");
+        showNotification(data.message || "¡Videos del canal sincronizados!");
+      } else {
+        setYoutubeSyncMessage(data.error || "Error al sincronizar con YouTube");
+      }
+    } catch (e) {
+      console.error(e);
+      setYoutubeSyncMessage("Error de conexión al sincronizar YouTube");
+    } finally {
+      setIsSyncingYouTube(false);
+    }
+  };
+
+  const handleAddManualVideo = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!manualVideoUrl.trim()) return;
+    setIsAddingVideo(true);
+    try {
+      const res = await fetch("/api/youtube/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "add-video", videoUrl: manualVideoUrl.trim() }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        if (data.videos) setYoutubeVideos(data.videos);
+        setManualVideoUrl("");
+        showNotification(data.message || "¡Video agregado al canal!");
+      } else {
+        alert(data.error || "No se pudo agregar el video");
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsAddingVideo(false);
+    }
+  };
+
+  const handleDeleteYouTubeVideo = async (videoId: string) => {
+    if (!confirm("¿Deseas retirar este video del showcase de la página web?")) return;
+    try {
+      const res = await fetch("/api/youtube/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "delete-video", videoId }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        if (data.videos) setYoutubeVideos(data.videos);
+        showNotification("Video retirado del catálogo");
+      }
+    } catch (e) {
+      console.error(e);
     }
   };
 
@@ -2258,28 +2343,46 @@ export default function AdminDashboardPage() {
                 </p>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleSyncYouTube}
+                  disabled={isSyncingYouTube}
+                  className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 text-white text-xs font-bold flex items-center gap-2 transition-all cursor-pointer shadow-lg shadow-red-900/40 disabled:opacity-50"
+                  title="Escanea el canal de YouTube @KorensMX y descarga automáticamente los últimos videos y shorts subidos"
+                >
+                  <RefreshCw className={`w-4 h-4 text-white ${isSyncingYouTube ? "animate-spin" : ""}`} />
+                  <span>{isSyncingYouTube ? "Sincronizando Videos..." : "Sincronizar Videos del Canal"}</span>
+                </button>
+
                 <a
                   href="/#social"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold flex items-center gap-2 transition-colors cursor-pointer"
+                  className="px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
                 >
                   <ExternalLink className="w-3.5 h-3.5 text-red-400" />
-                  <span>Ver Sección en Web</span>
+                  <span>Ver en Web</span>
                 </a>
 
                 <a
                   href="https://www.youtube.com/@KorensMX?sub_confirmation=1"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold flex items-center gap-2 transition-colors cursor-pointer shadow-lg shadow-red-900/30"
+                  className="px-3.5 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer shadow-lg shadow-red-900/30"
                 >
                   <Youtube className="w-3.5 h-3.5 fill-white" />
-                  <span>Enlace de Suscripción</span>
+                  <span>Suscripción</span>
                 </a>
               </div>
             </div>
+
+            {youtubeSyncMessage && (
+              <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-medium flex items-center gap-2 animate-in fade-in">
+                <CheckCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>{youtubeSyncMessage}</span>
+              </div>
+            )}
 
             {/* Panel Principal de Estado del Canal */}
             <div className="p-6 rounded-3xl bg-gradient-to-r from-red-950/40 via-slate-900 to-red-950/30 border border-red-500/30 space-y-4">
@@ -2293,7 +2396,7 @@ export default function AdminDashboardPage() {
                       <span>Canal Oficial: KORENS® (@KorensMX)</span>
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold border border-emerald-500/30">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                        Activo y Vinculado
+                        Sincronización Activa
                       </span>
                     </h4>
                     <span className="text-xs text-slate-400">
@@ -2329,83 +2432,113 @@ export default function AdminDashboardPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800">
                   <span className="text-[11px] text-slate-400 block mb-1">Videos en el Showcase</span>
-                  <span className="text-lg font-bold text-white font-mono">3 Videos HD</span>
+                  <span className="text-lg font-bold text-white font-mono">{youtubeVideos.length} Videos Oficiales</span>
                 </div>
                 <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800">
-                  <span className="text-[11px] text-slate-400 block mb-1">Reproductor</span>
-                  <span className="text-lg font-bold text-emerald-400">Modal Interactivo HD</span>
+                  <span className="text-[11px] text-slate-400 block mb-1">Orden Cronológico</span>
+                  <span className="text-lg font-bold text-emerald-400">Del Más Reciente al Más Antiguo</span>
                 </div>
                 <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800">
-                  <span className="text-[11px] text-slate-400 block mb-1">Llamado a la Acción</span>
-                  <span className="text-lg font-bold text-red-400">Suscripción 1-Clic</span>
+                  <span className="text-[11px] text-slate-400 block mb-1">Reproductor en la Web</span>
+                  <span className="text-lg font-bold text-red-400">Modal HD Cinema</span>
                 </div>
               </div>
             </div>
 
+            {/* Agregar Video o Short Manualmente */}
+            <div className="p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+              <div className="flex items-center gap-2">
+                <Plus className="w-4 h-4 text-korens-orange" />
+                <h4 className="text-xs font-bold text-white uppercase tracking-wider">
+                  ¿Subiste un nuevo video o Short y quieres agregarlo al instante?
+                </h4>
+              </div>
+              <p className="text-xs text-slate-400">
+                Pega la URL del video o Short de YouTube y se colocará automáticamente en primer lugar (destacado).
+              </p>
+
+              <form onSubmit={handleAddManualVideo} className="flex flex-col sm:flex-row gap-2 pt-1">
+                <input
+                  type="text"
+                  value={manualVideoUrl}
+                  onChange={(e) => setManualVideoUrl(e.target.value)}
+                  placeholder="https://www.youtube.com/shorts/... o https://youtu.be/..."
+                  className="flex-1 px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs placeholder:text-slate-600 focus:outline-none focus:border-red-500 font-mono"
+                />
+                <button
+                  type="submit"
+                  disabled={isAddingVideo || !manualVideoUrl.trim()}
+                  className="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer disabled:opacity-50 shrink-0 shadow-lg shadow-red-900/30"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>{isAddingVideo ? "Agregando..." : "Agregar al Inicio"}</span>
+                </button>
+              </form>
+            </div>
+
             {/* Listado de Videos Oficiales Activos en la Web */}
             <div className="space-y-4">
-              <div>
-                <h4 className="text-sm font-bold text-white flex items-center gap-2">
-                  <Youtube className="w-4 h-4 text-red-500 fill-red-500" />
-                  <span>Videos Oficiales Activos en el Feed Web</span>
-                </h4>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  Estos videos se reproducen en alta definición y sin anuncios molestos directamente en la página principal.
-                </p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                    <Youtube className="w-4 h-4 text-red-500 fill-red-500" />
+                    <span>Videos Oficiales Activos en el Feed Web ({youtubeVideos.length})</span>
+                  </h4>
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    El video #1 se reproduce de forma destacada en el Hero del feed. Todos están ordenados cronológicamente.
+                  </p>
+                </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {[
-                  {
-                    id: "rlTk4OiYlAE",
-                    title: "¿Mandas tu CV y nadie te llama? Descubre el error de los filtros ATS",
-                    type: "Short Destacado (El Más Reciente)",
-                    tag: "2 Sep 2026 • Filtros ATS",
-                    thumb: "https://i.ytimg.com/vi/rlTk4OiYlAE/hqdefault.jpg",
-                  },
-                  {
-                    id: "TdwocX8uSD0",
-                    title: "La nueva regla de oro para conseguir empleo en México hoy 📈",
-                    type: "Masterclass",
-                    tag: "20 Ago 2026 • Estrategia",
-                    thumb: "https://i.ytimg.com/vi/TdwocX8uSD0/hqdefault.jpg",
-                  },
-                  {
-                    id: "5T7t66GWzlo",
-                    title: "KORENS: Catálogo y Servicios | Estrategia y Empleabilidad de Alto Nivel 💼🚀",
-                    type: "Video de Catálogo (Fundacional)",
-                    tag: "25 Jul 2026 • Catálogo",
-                    thumb: "https://i.ytimg.com/vi/5T7t66GWzlo/hqdefault.jpg",
-                  },
-                ].map((v, i) => (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {youtubeVideos.map((v, i) => (
                   <div
-                    key={v.id}
-                    className="p-4 rounded-2xl bg-slate-900 border border-slate-800 hover:border-red-500/40 transition-colors flex flex-col justify-between space-y-3"
+                    key={v.id || v.youtubeId}
+                    className="p-4 rounded-2xl bg-slate-900 border border-slate-800 hover:border-red-500/40 transition-colors flex flex-col justify-between space-y-3 shadow-lg"
                   >
                     <div className="space-y-2">
                       <div className="relative aspect-video rounded-xl overflow-hidden bg-slate-950 border border-slate-800">
-                        <img src={v.thumb} alt={v.title} className="w-full h-full object-cover" />
-                        <span className="absolute top-2 left-2 bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
-                          {v.tag}
+                        <img
+                          src={v.thumbnail}
+                          alt={v.title}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = v.fallbackThumbnail;
+                          }}
+                        />
+                        <span className={`absolute top-2 left-2 ${v.badgeColor || 'bg-red-600'} text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md`}>
+                          {i === 0 ? "¡Nuevo! • Recién Subido" : v.tag || (v.isShort ? "Short" : "Video HD")}
                         </span>
-                        <span className="absolute bottom-2 right-2 bg-black/80 text-slate-300 text-[10px] font-mono px-1.5 py-0.5 rounded">
-                          #{i + 1}
+                        <span className="absolute bottom-2 right-2 bg-black/80 text-slate-200 text-[10px] font-mono px-1.5 py-0.5 rounded">
+                          #{i + 1} {i === 0 ? "(Destacado)" : ""}
                         </span>
                       </div>
-                      <h5 className="text-xs font-bold text-white line-clamp-2">{v.title}</h5>
-                      <span className="text-[11px] text-slate-400 font-mono block">ID: {v.id}</span>
+                      <h5 className="text-xs font-bold text-white line-clamp-2" title={v.title}>
+                        {v.title}
+                      </h5>
+                      <span className="text-[11px] text-slate-400 font-mono block truncate">
+                        ID: {v.youtubeId}
+                      </span>
                     </div>
 
                     <div className="flex items-center gap-2 pt-2 border-t border-slate-800">
                       <a
-                        href={`https://www.youtube.com/watch?v=${v.id}`}
+                        href={`https://www.youtube.com/watch?v=${v.youtubeId}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="w-full text-center py-2 px-3 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
+                        className="flex-1 text-center py-2 px-3 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
                       >
                         <ExternalLink className="w-3 h-3 text-red-400" />
                         <span>Ver en YouTube</span>
                       </a>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteYouTubeVideo(v.youtubeId)}
+                        className="p-2 rounded-lg bg-slate-800 hover:bg-red-500/20 text-slate-400 hover:text-red-400 transition-colors cursor-pointer border border-transparent hover:border-red-500/30"
+                        title="Retirar de la web"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
                     </div>
                   </div>
                 ))}

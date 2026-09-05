@@ -118,6 +118,28 @@ export interface SocialFeedPost {
   date: string;
 }
 
+export interface YouTubeVideo {
+  id: string;
+  youtubeId: string;
+  title: string;
+  description: string;
+  views?: string;
+  duration?: string;
+  thumbnail: string;
+  fallbackThumbnail: string;
+  tag?: string;
+  badgeColor?: string;
+  publishedAt?: string;
+  isShort?: boolean;
+}
+
+export interface YouTubeIntegration {
+  channelUrl: string;
+  channelHandle: string;
+  lastSyncAt: string;
+  videos: YouTubeVideo[];
+}
+
 export interface SiteContent {
   heroTitle: string;
   heroSubtitle: string;
@@ -129,6 +151,8 @@ export interface SiteContent {
   facebookPosts?: FacebookPost[];
   socialFeedPosts?: SocialFeedPost[];
   facebookPageUrl?: string;
+  youtubeIntegration?: YouTubeIntegration;
+  youtubeVideos?: YouTubeVideo[];
   diagnosticWhatsAppText: string;
   announcementText: string;
   showAnnouncement: boolean;

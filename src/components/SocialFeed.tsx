@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Youtube,
   ExternalLink,
@@ -11,19 +11,34 @@ import {
   Users,
   BellRing,
 } from "lucide-react";
+import { YouTubeVideo } from "@/lib/types";
 
 export default function SocialFeed() {
-  const [activeVideoId, setActiveVideoId] = useState<string>("rlTk4OiYlAE");
+  const [activeVideoId, setActiveVideoId] = useState<string>("Hqkf2tWTbbQ");
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [currentVideoTitle, setCurrentVideoTitle] = useState("");
 
   const youtubeChannelUrl = "https://www.youtube.com/@KorensMX";
   const subscribeUrl = "https://www.youtube.com/@KorensMX?sub_confirmation=1";
 
-  // Ordenados cronológicamente: Del más reciente al más antiguo
-  const youtubeVideos = [
+  // Ordenados cronológicamente: Del más reciente al más antiguo (dinámicos)
+  const [youtubeVideos, setYoutubeVideos] = useState<YouTubeVideo[]>([
     {
-      id: "v1",
+      id: "v-Hqkf2tWTbbQ",
+      youtubeId: "Hqkf2tWTbbQ",
+      title: "¡Destaca y consiguie empleo! 🚀 Conoce KORENS 💼✨ korens.com.mx",
+      description: "Descubre cómo en KORENS® reestructuramos tu perfil profesional y CV para ayudarte a conseguir el empleo y compensación que mereces.",
+      views: "¡Recién Subido!",
+      duration: "Short",
+      thumbnail: "https://i.ytimg.com/vi/Hqkf2tWTbbQ/maxresdefault.jpg",
+      fallbackThumbnail: "https://i.ytimg.com/vi/Hqkf2tWTbbQ/hqdefault.jpg",
+      tag: "¡Nuevo! • Recién Subido",
+      badgeColor: "bg-red-600",
+      publishedAt: "2026-09-04T22:00:00Z",
+      isShort: true,
+    },
+    {
+      id: "v-rlTk4OiYlAE",
       youtubeId: "rlTk4OiYlAE",
       title: "¿Mandas tu CV y nadie te llama? Descubre el error de los filtros ATS",
       description: "Aprende por qué los lectores automáticos de ATS descartan más del 70% de los currículums y la fórmula exacta para superarlos con éxito.",
@@ -31,23 +46,27 @@ export default function SocialFeed() {
       duration: "0:59",
       thumbnail: "https://i.ytimg.com/vi/rlTk4OiYlAE/maxresdefault.jpg",
       fallbackThumbnail: "https://i.ytimg.com/vi/rlTk4OiYlAE/hqdefault.jpg",
-      tag: "Más Reciente • Filtros ATS",
+      tag: "Filtros ATS",
       badgeColor: "bg-red-600",
+      publishedAt: "2026-09-02T12:00:00Z",
+      isShort: true,
     },
     {
-      id: "v2",
+      id: "v-TdwocX8uSD0",
       youtubeId: "TdwocX8uSD0",
       title: "La nueva regla de oro para conseguir empleo en México hoy 📈",
       description: "Estrategias prácticas sobre el mercado oculto de vacantes, posicionamiento en LinkedIn y cómo destacar frente a directores de talento humano.",
       views: "Publicado: 20 Ago 2026",
-      duration: "Estrategia",
+      duration: "Masterclass",
       thumbnail: "https://i.ytimg.com/vi/TdwocX8uSD0/maxresdefault.jpg",
       fallbackThumbnail: "https://i.ytimg.com/vi/TdwocX8uSD0/hqdefault.jpg",
       tag: "Estrategia 2026",
       badgeColor: "bg-emerald-500",
+      publishedAt: "2026-08-20T12:00:00Z",
+      isShort: false,
     },
     {
-      id: "v3",
+      id: "v-5T7t66GWzlo",
       youtubeId: "5T7t66GWzlo",
       title: "KORENS: Catálogo y Servicios | Estrategia y Empleabilidad de Alto Nivel 💼🚀",
       description: "Conoce a fondo nuestra metodología, los paquetes Plata, Oro y Platinum, y cómo transformamos perfiles profesionales en candidatos de alto impacto.",
@@ -57,8 +76,24 @@ export default function SocialFeed() {
       fallbackThumbnail: "https://i.ytimg.com/vi/5T7t66GWzlo/hqdefault.jpg",
       tag: "Catálogo Oficial",
       badgeColor: "bg-korens-orange",
+      publishedAt: "2026-07-25T12:00:00Z",
+      isShort: false,
     },
-  ];
+  ]);
+
+  useEffect(() => {
+    fetch("/api/youtube/sync")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.videos) && data.videos.length > 0) {
+          setYoutubeVideos(data.videos);
+          if (data.videos[0]?.youtubeId) {
+            setActiveVideoId(data.videos[0].youtubeId);
+          }
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const openVideo = (youtubeId: string, title: string) => {
     setActiveVideoId(youtubeId);
@@ -215,7 +250,7 @@ export default function SocialFeed() {
             </a>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {youtubeVideos.map((video) => (
               <div
                 key={video.id}
