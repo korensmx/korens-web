@@ -356,6 +356,60 @@ const DEFAULT_DB: DatabaseSchema = {
         "Reporte escrito con plan de mejora enviado a tu correo"
       ],
       mercadoPagoUrl: "https://mpago.li/2r26TTz"
+    },
+    {
+      id: "srv-cover-letter",
+      name: "Carta de Presentación (Cover Letter)",
+      category: "service",
+      realPrice: 300,
+      offerPrice: 200,
+      discountPercent: 33,
+      badge: "A LA CARTA",
+      deliveryFormat: "Entrega digital en 48 hrs hábiles (PDF y DOCX)",
+      description: "Redacción persuasiva y personalizada de tu carta de presentación ejecutiva, alineada a tu propuesta de valor y a las vacantes objetivo.",
+      features: [
+        "Redacción ejecutiva orientada a logros de alto impacto y propuesta de valor",
+        "Estructura estándar profesional de impacto internacional",
+        "Palabras clave optimizadas para filtros ATS y reclutadores humanos",
+        "Archivos editables en Word y versión final en formato PDF"
+      ],
+      mercadoPagoUrl: "https://www.mercadopago.com.mx"
+    },
+    {
+      id: "srv-postulacion",
+      name: "Servicio de Postulación en 1 Plataforma",
+      category: "service",
+      realPrice: 750,
+      offerPrice: 500,
+      discountPercent: 33,
+      badge: "30 DÍAS ACTIVOS",
+      deliveryFormat: "Gestión activa por 30 días naturales",
+      description: "Sólo por 30 días naturales y con envío de reportes semanales. Postulaciones continuas a vacantes afines en la plataforma de tu elección (LinkedIn, OCC, Indeed o Computrabajo).",
+      features: [
+        "Postulaciones continuas durante 30 días naturales",
+        "1 plataforma a elegir: LinkedIn, OCCMundial, Indeed o Computrabajo",
+        "Filtro estratégico según tu perfil, experiencia y aspiración salarial",
+        "Envío de reportes semanales con el detalle de postulaciones realizadas y estatus"
+      ],
+      mercadoPagoUrl: "https://www.mercadopago.com.mx"
+    },
+    {
+      id: "srv-recomendacion",
+      name: "Carta de Recomendación",
+      category: "service",
+      realPrice: 900,
+      offerPrice: 600,
+      discountPercent: 33,
+      badge: "VALIDACIÓN PROFESIONAL",
+      deliveryFormat: "Entrevista + Documento membretado digital",
+      description: "Con Entrevista y Validación de 1 Referencia de Trabajo y 1 Referencia Personal. Respaldo formal y verificación directa de tu trayectoria profesional.",
+      features: [
+        "Entrevista telefónica o virtual con 1 referencia de trabajo previa",
+        "Validación y entrevista con 1 referencia personal de respaldo",
+        "Redacción ejecutiva membretada de carta de recomendación profesional",
+        "Entrega en formato digital de alta resolución PDF firmado y editable"
+      ],
+      mercadoPagoUrl: "https://www.mercadopago.com.mx"
     }
   ],
   leads: [
@@ -534,6 +588,12 @@ declare global {
 
 function sanitizeDbInstance(instance: DatabaseSchema): DatabaseSchema {
   if (instance && instance.products) {
+    const existingIds = new Set(instance.products.map((p) => p.id));
+    for (const defaultProd of DEFAULT_DB.products) {
+      if (!existingIds.has(defaultProd.id)) {
+        instance.products.push(defaultProd);
+      }
+    }
     instance.products = instance.products.map((p) => {
       const officialUrl = OFFICIAL_MERCADO_PAGO_URLS[p.id];
       if (officialUrl) {

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { FileText, Globe2, Languages, Video, Target, ArrowRight, CheckCircle2, Clock } from "lucide-react";
+import { FileText, Globe2, Languages, Video, Target, ArrowRight, CheckCircle2, Clock, Mail, Send, Award } from "lucide-react";
 import { Product } from "@/lib/types";
 
 interface ServicesProps {
@@ -43,6 +43,12 @@ export default function Services({ onSelectProduct }: ServicesProps) {
         return <Target className="w-6 h-6 text-korens-orange" />;
       case "srv-simulacion":
         return <Video className="w-6 h-6 text-korens-orange" />;
+      case "srv-cover-letter":
+        return <Mail className="w-6 h-6 text-korens-orange" />;
+      case "srv-postulacion":
+        return <Send className="w-6 h-6 text-korens-orange" />;
+      case "srv-recomendacion":
+        return <Award className="w-6 h-6 text-korens-orange" />;
       default:
         return <FileText className="w-6 h-6 text-korens-orange" />;
     }
@@ -65,7 +71,7 @@ export default function Services({ onSelectProduct }: ServicesProps) {
         </div>
 
         {/* Grid de Servicios Individuales */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {services.map((srv) => (
             <div
               key={srv.id}
