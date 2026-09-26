@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getDiagnostics, addDiagnostic } from "@/lib/db";
+import { getDiagnostics, addDiagnostic, updateDiagnosticCrmInfo } from "@/lib/db";
+import { sendLeadToCrm } from "@/lib/crm";
 
 export async function GET() {
   try {
@@ -30,6 +31,26 @@ export async function POST(req: NextRequest) {
       targetSalary: targetSalary || "A convenir",
       score: score || 65,
     });
+
+    // Igual que en checkout: manda el diagnóstico al CRM (Chatwoot vía n8n)
+    // para que quede como conversación con nota interna del asesor.
+    try {
+      const crmResult = await sendLeadToCrm({
+        name: saved.name,
+        email: saved.email,
+        whatsapp: saved.whatsapp,
+        productTitle: "Diagnóstico de Empleabilidad",
+        price: 0,
+        source: "web-diagnostico",
+        leadId: saved.id,
+        notes: `Rol actual: ${saved.currentRole} | Experiencia: ${saved.yearsOfExperience} | Reto principal: ${saved.biggestChallenge} | Sueldo objetivo: ${saved.targetSalary} | Score: ${saved.score}`,
+      });
+      if (crmResult?.success && crmResult.conversationId) {
+        updateDiagnosticCrmInfo(saved.id, crmResult.conversationId);
+      }
+    } catch (err) {
+      console.error("Error al sincronizar diagnóstico con el CRM:", err);
+    }
 
     return NextResponse.json({ success: true, diagnostic: saved });
   } catch (error) {

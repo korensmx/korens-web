@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getLeads, addLead, updateLeadStatus, getProductById, getSiteContent } from "@/lib/db";
+import { getLeads, addLead, updateLeadStatus, updateLeadCrmInfo, getProductById, getSiteContent } from "@/lib/db";
 import { calculateMeetingIsoDates, buildGoogleCalendarUrl, sendGoogleAppsScriptWebhook } from "@/lib/calendar";
+import { sendLeadToCrm } from "@/lib/crm";
 
 export async function GET() {
   try {
@@ -110,6 +111,29 @@ export async function POST(req: NextRequest) {
       googleSynced: false,
     });
 
+    // Sincronización con el CRM (Chatwoot vía n8n): crea/actualiza el contacto
+    // y abre una conversación para que el asesor le dé seguimiento. Si el CRM
+    // no responde, el lead ya quedó guardado en la web y el checkout continúa.
+    let crmConversationId: number | undefined;
+    try {
+      const crmResult = await sendLeadToCrm({
+        name: savedLead.name,
+        email: savedLead.email,
+        whatsapp: savedLead.whatsapp,
+        productTitle: savedLead.productTitle,
+        price: savedLead.price,
+        source: "web-checkout",
+        leadId: savedLead.id,
+        notes: savedLead.notes,
+      });
+      if (crmResult?.success && crmResult.conversationId) {
+        crmConversationId = crmResult.conversationId;
+        updateLeadCrmInfo(savedLead.id, crmResult.conversationId);
+      }
+    } catch (err) {
+      console.error("Error al sincronizar lead con el CRM:", err);
+    }
+
     return NextResponse.json({
       success: true,
       lead: savedLead,
@@ -117,6 +141,7 @@ export async function POST(req: NextRequest) {
       calendarUrl: finalCalendarUrl,
       meetLink: finalMeetLink,
       icsUrl: `/api/calendar/ics?id=${savedLead.id}`,
+      crmConversationId,
     });
   } catch (error) {
     console.error("Error creating lead:", error);

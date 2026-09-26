@@ -1021,6 +1021,7 @@ export default function AdminDashboardPage() {
                     <th className="p-3.5">Cita Agendada (Google Meet)</th>
                     <th className="p-3.5">Fecha Registro</th>
                     <th className="p-3.5">Estatus</th>
+                    <th className="p-3.5">CRM (Chatwoot)</th>
                     <th className="p-3.5 text-right">Acción</th>
                   </tr>
                 </thead>
@@ -1115,6 +1116,22 @@ export default function AdminDashboardPage() {
                             <option value="Pagado">Pagado</option>
                             <option value="Cancelado">Cancelado</option>
                           </select>
+                        </td>
+                        <td className="p-3.5">
+                          {lead.crmConversationId ? (
+                            <a
+                              href={`https://korens-chatwoot-75c02a-95-111-239-97.sslip.io/app/accounts/1/conversations/${lead.crmConversationId}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-korens-orange/15 hover:bg-korens-orange/25 text-korens-orange border border-korens-orange/40 text-[10px] font-bold transition-colors"
+                              title="Abrir esta conversación en el CRM"
+                            >
+                              <ExternalLink className="w-3 h-3" />
+                              <span>Conversación #{lead.crmConversationId}</span>
+                            </a>
+                          ) : (
+                            <span className="text-slate-500 italic text-[11px]">Sin sincronizar</span>
+                          )}
                         </td>
                         <td className="p-3.5 text-right">
                           <a
@@ -1661,6 +1678,7 @@ export default function AdminDashboardPage() {
                     <th className="p-3.5">Cargo / Experiencia</th>
                     <th className="p-3.5">Obstáculo Principal</th>
                     <th className="p-3.5">Fecha</th>
+                    <th className="p-3.5">CRM (Chatwoot)</th>
                     <th className="p-3.5 text-right">WhatsApp</th>
                   </tr>
                 </thead>
@@ -1678,6 +1696,22 @@ export default function AdminDashboardPage() {
                       </td>
                       <td className="p-3.5 text-slate-300 max-w-xs truncate">{d.biggestChallenge}</td>
                       <td className="p-3.5 text-slate-500">{new Date(d.createdAt).toLocaleDateString()}</td>
+                      <td className="p-3.5">
+                        {d.crmConversationId ? (
+                          <a
+                            href={`https://korens-chatwoot-75c02a-95-111-239-97.sslip.io/app/accounts/1/conversations/${d.crmConversationId}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-korens-orange/15 hover:bg-korens-orange/25 text-korens-orange border border-korens-orange/40 text-[10px] font-bold transition-colors"
+                            title="Abrir esta conversación en el CRM"
+                          >
+                            <ExternalLink className="w-3 h-3" />
+                            <span>Conversación #{d.crmConversationId}</span>
+                          </a>
+                        ) : (
+                          <span className="text-slate-500 italic text-[11px]">Sin sincronizar</span>
+                        )}
+                      </td>
                       <td className="p-3.5 text-right">
                         <a
                           href={`https://wa.me/${d.whatsapp.replace(/\D/g, "")}?text=${encodeURIComponent(
