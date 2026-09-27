@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import "./globals.css";
+
+const CHATWOOT_BASE_URL = "https://korens-chatwoot-75c02a-95-111-239-97.sslip.io";
+const CHATWOOT_WEBSITE_TOKEN = "M6izoNTRWbCZWyt4ZT9dGNwM";
 
 export const metadata: Metadata = {
   title: "KORENS® | Consultoría Estratégica de Carrera & Aceleración Profesional",
@@ -36,6 +40,23 @@ export default function RootLayout({
       </head>
       <body className="bg-korens-bg text-korens-platinum antialiased selection:bg-korens-orange selection:text-white">
         {children}
+
+        {/* Chatwoot (Mr. Bingo) con burbuja oculta: la web usa su propio botón "Chatea con Mr. Bingo" */}
+        <Script id="chatwoot-settings" strategy="afterInteractive">
+          {`
+            window.chatwootSettings = { hideMessageBubble: true, locale: "es", position: "right", type: "standard" };
+            (function(d,t) {
+              var BASE_URL="${CHATWOOT_BASE_URL}";
+              var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+              g.src=BASE_URL+"/packs/js/sdk.js";
+              g.async = true;
+              s.parentNode.insertBefore(g,s);
+              g.onload=function(){
+                window.chatwootSDK.run({ websiteToken: "${CHATWOOT_WEBSITE_TOKEN}", baseUrl: BASE_URL });
+              }
+            })(document,"script");
+          `}
+        </Script>
       </body>
     </html>
   );
