@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import { FileText, Globe2, Languages, Video, Target, ArrowRight, CheckCircle2, Clock, Mail, Send, Award } from "lucide-react";
 import { Product } from "@/lib/types";
 
@@ -68,6 +69,26 @@ export default function Services({ onSelectProduct }: ServicesProps) {
           <p className="text-sm sm:text-base text-slate-300 mt-3">
             Elige módulos individuales si ya cuentas con una base y deseas perfeccionar un área clave de tu candidatura.
           </p>
+        </div>
+
+        {/* Foto profesional del equipo consultor */}
+        <div className="relative rounded-2xl overflow-hidden mb-12 border border-slate-800 max-w-4xl mx-auto">
+          <Image
+            src="/assets/photos/servicios-equipo.jpg"
+            alt="Equipo de consultores KORENS analizando la estrategia de carrera de un cliente"
+            width={1456}
+            height={1088}
+            className="w-full h-[220px] sm:h-[280px] object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-korens-bg via-korens-bg/20 to-transparent" />
+          <div className="absolute bottom-4 left-5 right-5">
+            <p className="text-white font-bold text-sm sm:text-base">
+              Consultores certificados, resultados con datos.
+            </p>
+            <p className="text-slate-300 text-xs sm:text-sm mt-0.5">
+              Cada módulo lo ejecuta un especialista, no una plantilla automática.
+            </p>
+          </div>
         </div>
 
         {/* Grid de Servicios Individuales */}

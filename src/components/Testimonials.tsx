@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import Image from "next/image";
 import { Star, Quote, Video, Upload, CheckCircle2, AlertCircle, Play, X, Plus, Sparkles } from "lucide-react";
 import { Review } from "@/lib/types";
 
@@ -173,6 +174,24 @@ export default function Testimonials() {
             <Plus className="w-4 h-4" />
             <span>Compartir mi experiencia</span>
           </button>
+        </div>
+
+        {/* Foto profesional de cierre de acuerdo */}
+        <div className="relative rounded-2xl overflow-hidden mb-12 border border-slate-800">
+          <Image
+            src="/assets/photos/testimonios-exito.jpg"
+            alt="Profesional cerrando una oferta laboral tras el acompañamiento de KORENS"
+            width={1456}
+            height={1088}
+            className="w-full h-[200px] sm:h-[260px] object-cover object-[center_25%]"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-korens-bg via-korens-bg/40 to-transparent" />
+          <div className="absolute inset-y-0 left-5 sm:left-8 flex flex-col justify-center max-w-xs">
+            <Quote className="w-6 h-6 text-korens-orange mb-2" />
+            <p className="text-white font-bold text-sm sm:text-base leading-snug">
+              El momento en que tu propuesta de valor cierra la oferta.
+            </p>
+          </div>
         </div>
 
         {/* Grid de Reseñas */}
