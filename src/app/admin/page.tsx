@@ -108,6 +108,19 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState("");
 
+  // Estado en vivo de las conversaciones del CRM (Chatwoot), consultado vía n8n
+  interface CrmStatus {
+    conversationId: number;
+    status: string;
+    unreadCount: number;
+    lastMessage: string;
+    lastActivity: string | null;
+    assignee: string;
+    found: boolean;
+  }
+  const [crmStatuses, setCrmStatuses] = useState<Record<number, CrmStatus>>({});
+  const [crmStatusLoading, setCrmStatusLoading] = useState(false);
+
   // Product edit state
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isSavingProduct, setIsSavingProduct] = useState(false);
@@ -205,6 +218,15 @@ export default function AdminDashboardPage() {
         }
       }
       if (diagRes.success) setDiagnostics(diagRes.diagnostics || []);
+
+      // En cuanto sabemos qué leads/diagnósticos tienen conversación en el CRM,
+      // preguntamos su estado en vivo (abierta/pendiente/resuelta, no leídos...).
+      const leadIds: number[] = leadsRes.success ? (leadsRes.leads || []).map((l: Lead) => l.crmConversationId).filter(Boolean) : [];
+      const diagIds: number[] = diagRes.success ? (diagRes.diagnostics || []).map((d: DiagnosticSubmission) => d.crmConversationId).filter(Boolean) : [];
+      const allConversationIds = Array.from(new Set([...leadIds, ...diagIds])) as number[];
+      if (allConversationIds.length > 0) {
+        fetchCrmStatuses(allConversationIds);
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -215,6 +237,111 @@ export default function AdminDashboardPage() {
   const showNotification = (msg: string) => {
     setSaveSuccess(msg);
     setTimeout(() => setSaveSuccess(""), 4000);
+  };
+
+  // Pregunta a n8n (que a su vez consulta a Chatwoot) el estado en vivo de las
+  // conversaciones del CRM. El token de administrador del CRM nunca llega a la web.
+  const fetchCrmStatuses = async (conversationIds: number[]) => {
+    if (!conversationIds || conversationIds.length === 0) return;
+    setCrmStatusLoading(true);
+    try {
+      const res = await fetch("/api/crm/status", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ conversationIds }),
+      });
+      const data = await res.json();
+      if (data.success && Array.isArray(data.conversations)) {
+        setCrmStatuses((prev) => {
+          const next = { ...prev };
+          for (const c of data.conversations) {
+            next[c.conversationId] = c;
+          }
+          return next;
+        });
+      }
+    } catch (err) {
+      console.error("No se pudo obtener el estado del CRM:", err);
+    } finally {
+      setCrmStatusLoading(false);
+    }
+  };
+
+  const crmStatusStyles: Record<string, string> = {
+    open: "bg-emerald-500/20 text-emerald-400 border-emerald-500/40",
+    pending: "bg-amber-500/20 text-amber-400 border-amber-500/40",
+    resolved: "bg-slate-700/40 text-slate-300 border-slate-600/60",
+    snoozed: "bg-cyan-500/20 text-cyan-300 border-cyan-500/40",
+    desconocido: "bg-slate-800 text-slate-500 border-slate-700",
+  };
+
+  const crmStatusLabels: Record<string, string> = {
+    open: "Abierta",
+    pending: "Pendiente",
+    resolved: "Resuelta",
+    snoozed: "Pospuesta",
+    desconocido: "Sin datos",
+  };
+
+  const renderCrmCell = (conversationId?: number) => {
+    if (!conversationId) {
+      return <span className="text-slate-500 italic text-[11px]">Sin sincronizar</span>;
+    }
+    const s = crmStatuses[conversationId];
+    return (
+      <div className="space-y-1">
+        <a
+          href={`https://korens-chatwoot-75c02a-95-111-239-97.sslip.io/app/accounts/1/conversations/${conversationId}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-korens-orange/15 hover:bg-korens-orange/25 text-korens-orange border border-korens-orange/40 text-[10px] font-bold transition-colors"
+          title="Abrir esta conversación en el CRM"
+        >
+          <ExternalLink className="w-3 h-3" />
+          <span>Conversación #{conversationId}</span>
+        </a>
+        <div className="flex items-center gap-1.5 flex-wrap">
+          {crmStatusLoading && !s ? (
+            <span className="text-slate-500 text-[10px] italic">Consultando…</span>
+          ) : s ? (
+            <>
+              <span
+                className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                  crmStatusStyles[s.status] || crmStatusStyles.desconocido
+                }`}
+              >
+                {crmStatusLabels[s.status] || s.status}
+              </span>
+              {s.unreadCount > 0 && (
+                <span className="px-1.5 py-0.5 rounded-full bg-red-500/25 text-red-300 border border-red-500/40 text-[10px] font-bold">
+                  {s.unreadCount} sin leer
+                </span>
+              )}
+              {s.assignee && (
+                <span className="text-slate-400 text-[10px]" title="Asesor asignado">
+                  👤 {s.assignee}
+                </span>
+              )}
+            </>
+          ) : null}
+        </div>
+        {s?.lastMessage && (
+          <p className="text-slate-500 text-[10px] italic max-w-[220px] truncate" title={s.lastMessage}>
+            &ldquo;{s.lastMessage}&rdquo;
+          </p>
+        )}
+        {s?.lastActivity && (
+          <p className="text-slate-500 text-[10px]">
+            {new Date(s.lastActivity).toLocaleDateString("es-MX", {
+              day: "2-digit",
+              month: "short",
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+          </p>
+        )}
+      </div>
+    );
   };
 
   // Google Integration Handlers
@@ -1001,13 +1128,32 @@ export default function AdminDashboardPage() {
                 </p>
               </div>
 
-              <button
-                onClick={exportLeadsCSV}
-                className="btn-orange-glow text-white text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-2 self-start cursor-pointer"
-              >
-                <Download className="w-4 h-4" />
-                <span>Exportar Leads a CSV (Excel)</span>
-              </button>
+              <div className="flex items-center gap-2 self-start">
+                <button
+                  onClick={() => {
+                    const ids = Array.from(
+                      new Set([
+                        ...leads.map((l) => l.crmConversationId).filter(Boolean),
+                        ...diagnostics.map((d) => d.crmConversationId).filter(Boolean),
+                      ])
+                    ) as number[];
+                    fetchCrmStatuses(ids);
+                  }}
+                  disabled={crmStatusLoading}
+                  className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-2 cursor-pointer border border-slate-700 disabled:opacity-50"
+                  title="Vuelve a consultar el estado de las conversaciones en el CRM"
+                >
+                  <RefreshCw className={`w-4 h-4 ${crmStatusLoading ? "animate-spin" : ""}`} />
+                  <span>Actualizar estado CRM</span>
+                </button>
+                <button
+                  onClick={exportLeadsCSV}
+                  className="btn-orange-glow text-white text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-2 cursor-pointer"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>Exportar Leads a CSV (Excel)</span>
+                </button>
+              </div>
             </div>
 
             <div className="overflow-x-auto rounded-2xl border border-slate-800 bg-korens-card">
@@ -1117,22 +1263,7 @@ export default function AdminDashboardPage() {
                             <option value="Cancelado">Cancelado</option>
                           </select>
                         </td>
-                        <td className="p-3.5">
-                          {lead.crmConversationId ? (
-                            <a
-                              href={`https://korens-chatwoot-75c02a-95-111-239-97.sslip.io/app/accounts/1/conversations/${lead.crmConversationId}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-korens-orange/15 hover:bg-korens-orange/25 text-korens-orange border border-korens-orange/40 text-[10px] font-bold transition-colors"
-                              title="Abrir esta conversación en el CRM"
-                            >
-                              <ExternalLink className="w-3 h-3" />
-                              <span>Conversación #{lead.crmConversationId}</span>
-                            </a>
-                          ) : (
-                            <span className="text-slate-500 italic text-[11px]">Sin sincronizar</span>
-                          )}
-                        </td>
+                        <td className="p-3.5">{renderCrmCell(lead.crmConversationId)}</td>
                         <td className="p-3.5 text-right">
                           <a
                             href={waLink}
@@ -1696,22 +1827,7 @@ export default function AdminDashboardPage() {
                       </td>
                       <td className="p-3.5 text-slate-300 max-w-xs truncate">{d.biggestChallenge}</td>
                       <td className="p-3.5 text-slate-500">{new Date(d.createdAt).toLocaleDateString()}</td>
-                      <td className="p-3.5">
-                        {d.crmConversationId ? (
-                          <a
-                            href={`https://korens-chatwoot-75c02a-95-111-239-97.sslip.io/app/accounts/1/conversations/${d.crmConversationId}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-korens-orange/15 hover:bg-korens-orange/25 text-korens-orange border border-korens-orange/40 text-[10px] font-bold transition-colors"
-                            title="Abrir esta conversación en el CRM"
-                          >
-                            <ExternalLink className="w-3 h-3" />
-                            <span>Conversación #{d.crmConversationId}</span>
-                          </a>
-                        ) : (
-                          <span className="text-slate-500 italic text-[11px]">Sin sincronizar</span>
-                        )}
-                      </td>
+                      <td className="p-3.5">{renderCrmCell(d.crmConversationId)}</td>
                       <td className="p-3.5 text-right">
                         <a
                           href={`https://wa.me/${d.whatsapp.replace(/\D/g, "")}?text=${encodeURIComponent(

@@ -7,6 +7,10 @@ const N8N_CRM_WEBHOOK_URL =
   process.env.N8N_KORENS_CRM_WEBHOOK_URL ||
   "https://korens-n8n-d4e981-95-111-239-97.sslip.io/webhook/korens-web-crm";
 
+const N8N_CRM_STATUS_WEBHOOK_URL =
+  process.env.N8N_KORENS_CRM_STATUS_WEBHOOK_URL ||
+  "https://korens-n8n-d4e981-95-111-239-97.sslip.io/webhook/korens-crm-status";
+
 export interface CrmLeadPayload {
   name: string;
   email: string;
@@ -59,5 +63,53 @@ export async function sendLeadToCrm(payload: CrmLeadPayload): Promise<CrmSyncRes
   } catch (err) {
     console.error("No se pudo sincronizar con el CRM (Chatwoot):", err);
     return null;
+  }
+}
+
+export interface CrmConversationStatus {
+  conversationId: number;
+  status: string;
+  unreadCount: number;
+  lastMessage: string;
+  lastActivity: string | null;
+  assignee: string;
+  found: boolean;
+}
+
+/**
+ * Le pregunta a n8n (que a su vez consulta a Chatwoot con el token de admin del
+ * CRM) el estado actual de una o varias conversaciones. Se usa desde el panel
+ * de administración para mostrar el estatus en vivo sin guardar el token del
+ * CRM en la web. Nunca lanza: si el CRM no responde, regresa un arreglo vacío.
+ */
+export async function getCrmConversationsStatus(
+  conversationIds: number[]
+): Promise<CrmConversationStatus[]> {
+  if (!conversationIds || conversationIds.length === 0) return [];
+
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+    const res = await fetch(N8N_CRM_STATUS_WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ conversationIds }),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!res.ok) {
+      console.error("CRM (estado de conversaciones) respondió con estatus", res.status);
+      return [];
+    }
+
+    const data = await res.json();
+    if (!data?.success || !Array.isArray(data.conversations)) return [];
+    return data.conversations as CrmConversationStatus[];
+  } catch (err) {
+    console.error("No se pudo consultar el estado del CRM (Chatwoot):", err);
+    return [];
   }
 }
