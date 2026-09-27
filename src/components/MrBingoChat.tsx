@@ -92,7 +92,7 @@ export default function MrBingoChat() {
   };
 
   return (
-    <aside aria-label="Chatea con Mr. Bingo" className="fixed bottom-6 left-6 z-50 flex flex-col items-start gap-3">
+    <aside aria-label="Chatea con Mr. Bingo" className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
       {/* Panel pre-chat */}
       {open && (
         <div className="w-[300px] sm:w-[330px] glass-panel-glow rounded-2xl overflow-hidden shadow-2xl animate-in fade-in slide-in-from-bottom-3 duration-300">
@@ -191,7 +191,7 @@ export default function MrBingoChat() {
 
       {/* Tooltip sutil */}
       {!open && showTooltip && (
-        <div className="hidden sm:flex items-center gap-2 bg-slate-900/95 text-white border border-slate-700/80 px-4 py-2.5 rounded-2xl shadow-2xl backdrop-blur-md animate-in fade-in slide-in-from-left-3 duration-300 max-w-[220px]">
+        <div className="hidden sm:flex items-center gap-2 bg-slate-900/95 text-white border border-slate-700/80 px-4 py-2.5 rounded-2xl shadow-2xl backdrop-blur-md animate-in fade-in slide-in-from-right-3 duration-300 max-w-[220px]">
           <Sparkles className="w-4 h-4 text-korens-orange shrink-0" />
           <span className="text-[11px] text-slate-200">Mr. Bingo puede ayudarte a diagnosticar tu perfil, ¡pregúntale!</span>
           <button

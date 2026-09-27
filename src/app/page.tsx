@@ -12,7 +12,6 @@ import Testimonials from "@/components/Testimonials";
 import Footer from "@/components/Footer";
 import CheckoutModal from "@/components/CheckoutModal";
 import DiagnosticModal from "@/components/DiagnosticModal";
-import WhatsAppFloating from "@/components/WhatsAppFloating";
 import MrBingoChat from "@/components/MrBingoChat";
 import { Product } from "@/lib/types";
 
@@ -65,7 +64,6 @@ export default function HomePage() {
       <Footer />
 
       {/* Floating Elements */}
-      <WhatsAppFloating />
       <MrBingoChat />
 
       {/* Checkout Modal with Lead Capture & Mercado Pago Redirection */}
