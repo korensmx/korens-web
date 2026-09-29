@@ -46,6 +46,8 @@ export default function CheckoutModal({ product, isOpen, onClose }: CheckoutModa
   const [isLoadingSlots, setIsLoadingSlots] = useState(false);
 
   const [loading, setLoading] = useState(false);
+
+  const [payUrl, setPayUrl] = useState("");
   const [error, setError] = useState("");
   const [successLead, setSuccessLead] = useState<any>(null);
 
@@ -200,6 +202,7 @@ export default function CheckoutModal({ product, isOpen, onClose }: CheckoutModa
       const data = await res.json();
 
       if (data.success) {
+        setPayUrl(data.mercadoPagoUrl || "");
         setSuccessLead(data.lead);
         setLoading(false);
 
@@ -549,7 +552,7 @@ export default function CheckoutModal({ product, isOpen, onClose }: CheckoutModa
                   {/* Botón Principal a Mercado Pago */}
                   <div className="pt-2">
                     <a
-                      href={product.mercadoPagoUrl || "https://www.mercadopago.com.mx"}
+                      href={payUrl || product.mercadoPagoUrl || "https://www.mercadopago.com.mx"}
                       className="w-full btn-orange-glow text-white font-black py-4 px-6 rounded-xl flex items-center justify-center gap-2 shadow-2xl text-sm sm:text-base cursor-pointer"
                     >
                       <CreditCard className="w-4 h-4" />

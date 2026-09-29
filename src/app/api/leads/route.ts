@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
     const product = getProductById(productId);
     const productTitle = product ? product.name : "Servicio KORENS";
     const price = product ? product.offerPrice : 0;
-    const mercadoPagoUrl = product?.mercadoPagoUrl || "https://www.mercadopago.com.mx";
+    let mercadoPagoUrl = product?.mercadoPagoUrl || "https://www.mercadopago.com.mx";
 
     let startIso: string | undefined;
     let endIso: string | undefined;
@@ -109,6 +109,34 @@ export async function POST(req: NextRequest) {
       calendarUrl: finalCalendarUrl || undefined,
       googleSynced: false,
     });
+
+    // Flujo KORENS: crea la conversación en Chatwoot y un link de pago único en Mercado Pago (vía n8n).
+    // Si n8n no responde, se usa el link estático del producto como respaldo.
+    try {
+      const checkoutUrl =
+        process.env.N8N_CHECKOUT_URL ||
+        "https://korens-n8n-d4e981-95-111-239-97.sslip.io/webhook/korens-web-checkout";
+      const r = await fetch(checkoutUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          productId,
+          name: name.trim(),
+          email: email.trim().toLowerCase(),
+          whatsapp: whatsapp.trim(),
+          notes: notes || "",
+          scheduledDate: scheduledDate || "",
+          scheduledTime: scheduledTime || "",
+          leadId: savedLead.id,
+        }),
+        signal: AbortSignal.timeout(15000),
+      });
+      const j = await r.json();
+      const url = j?.init_point || j?.initPoint;
+      if (url) mercadoPagoUrl = url;
+    } catch (err) {
+      console.error("Checkout n8n no disponible, uso link estático:", err);
+    }
 
     return NextResponse.json({
       success: true,
