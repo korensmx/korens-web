@@ -206,15 +206,7 @@ export default function CheckoutModal({ product, isOpen, onClose }: CheckoutModa
         setSuccessLead(data.lead);
         setLoading(false);
 
-        // 1. Abrir Google Calendar en una pestaña nueva automáticamente
-        const targetCal = data.calendarUrl || calUrl;
-        if (targetCal) {
-          try {
-            window.open(targetCal, "_blank");
-          } catch (e) {
-            console.error("Popup blocked:", e);
-          }
-        }
+        if (data.mercadoPagoUrl) { window.location.href = data.mercadoPagoUrl; return; }
       } else {
         setError(data.error || "Ocurrió un error al registrar tu cita.");
         setLoading(false);
