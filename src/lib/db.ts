@@ -741,6 +741,16 @@ export function updateLeadStatus(id: string, status: Lead["status"], notes?: str
   return lead;
 }
 
+export function updateLeadCrmInfo(id: string, conversationId: number): Lead | null {
+  const db = ensureDb();
+  const lead = db.leads.find((l) => l.id === id);
+  if (!lead) return null;
+  lead.crmSynced = true;
+  lead.crmConversationId = conversationId;
+  writeDb(db);
+  return lead;
+}
+
 export function getBlogPosts(): BlogPost[] {
   const db = ensureDb();
   return db.blogPosts;
@@ -875,6 +885,16 @@ export function addDiagnostic(data: Omit<DiagnosticSubmission, "id" | "createdAt
 export function getDiagnostics(): DiagnosticSubmission[] {
   const db = ensureDb();
   return (db.diagnostics || []).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+}
+
+export function updateDiagnosticCrmInfo(id: string, conversationId: number): DiagnosticSubmission | null {
+  const db = ensureDb();
+  const diag = (db.diagnostics || []).find((d) => d.id === id);
+  if (!diag) return null;
+  diag.crmSynced = true;
+  diag.crmConversationId = conversationId;
+  writeDb(db);
+  return diag;
 }
 
 export function verifyAdminPassword(pass: string): boolean {

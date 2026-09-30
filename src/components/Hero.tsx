@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import { CheckCircle2, ArrowRight, Sparkles, TrendingUp, Award, Users, ChevronRight, Compass } from "lucide-react";
+import { CheckCircle2, ArrowRight, Sparkles, TrendingUp, Award, Users, ChevronRight, Compass, Quote } from "lucide-react";
 
 interface HeroProps {
   onSelectPackageTarget?: () => void;
@@ -50,6 +50,27 @@ export default function Hero({ onSelectPackageTarget, onOpenDiagnostic }: HeroPr
       {/* Luz ambiental de fondo */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-korens-orange/10 rounded-full blur-[140px] pointer-events-none" />
       <div className="absolute top-1/3 right-10 w-[400px] h-[400px] bg-korens-navy-accent/20 rounded-full blur-[120px] pointer-events-none" />
+
+      {/* Foto profesional decorativa (solo pantallas grandes) */}
+      <div className="hidden xl:block absolute top-24 right-8 w-[280px] z-10">
+        <div className="relative rounded-2xl overflow-hidden border border-korens-orange/30 shadow-glowOrange glass-panel">
+          <Image
+            src="/assets/photos/hero-consultant.jpg"
+            alt="Consultora de carrera KORENS trabajando con un cliente"
+            width={280}
+            height={373}
+            className="w-full h-auto object-cover"
+            priority
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-korens-bg via-transparent to-transparent opacity-60" />
+        </div>
+        <div className="mt-3 glass-panel rounded-xl px-4 py-3 flex items-start gap-2">
+          <Quote className="w-4 h-4 text-korens-orange shrink-0 mt-0.5" />
+          <p className="text-[11px] text-slate-300 leading-snug">
+            Cada sesión con KORENS está diseñada para que tu experiencia hable el idioma que el mercado busca.
+          </p>
+        </div>
+      </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center max-w-4xl mx-auto space-y-6">

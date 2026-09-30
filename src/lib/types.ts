@@ -16,6 +16,8 @@ export interface Lead {
   calendarUrl?: string;
   googleSynced?: boolean;
   googleEventId?: string;
+  crmSynced?: boolean;
+  crmConversationId?: number;
   createdAt: string;
 }
 
@@ -178,5 +180,7 @@ export interface DiagnosticSubmission {
   targetSalary: string;
   score: number;
   status: "Nuevo" | "Atendido";
+  crmSynced?: boolean;
+  crmConversationId?: number;
   createdAt: string;
 }

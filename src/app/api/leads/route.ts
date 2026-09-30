@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getLeads, addLead, updateLeadStatus, getProductById, getSiteContent } from "@/lib/db";
+import { getLeads, addLead, updateLeadStatus, updateLeadCrmInfo, getProductById, getSiteContent } from "@/lib/db";
 import { calculateMeetingIsoDates, buildGoogleCalendarUrl, sendGoogleAppsScriptWebhook } from "@/lib/calendar";
 
 export async function GET() {
@@ -110,8 +110,10 @@ export async function POST(req: NextRequest) {
       googleSynced: false,
     });
 
-    // Flujo KORENS: crea la conversación en Chatwoot y un link de pago único en Mercado Pago (vía n8n).
-    // Si n8n no responde, se usa el link estático del producto como respaldo.
+    // Flujo KORENS (n8n): crea la conversación en el CRM (Chatwoot) y un link de pago
+    // único de Mercado Pago con el precio oficial. Si n8n no responde, el lead ya quedó
+    // guardado y se usa el link estático del producto como respaldo.
+    let crmConversationId: number | undefined;
     try {
       const checkoutUrl =
         process.env.N8N_CHECKOUT_URL ||
@@ -121,10 +123,10 @@ export async function POST(req: NextRequest) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           productId,
-          name: name.trim(),
-          email: email.trim().toLowerCase(),
-          whatsapp: whatsapp.trim(),
-          notes: notes || "",
+          name: savedLead.name,
+          email: savedLead.email,
+          whatsapp: savedLead.whatsapp,
+          notes: savedLead.notes || "",
           scheduledDate: scheduledDate || "",
           scheduledTime: scheduledTime || "",
           leadId: savedLead.id,
@@ -132,8 +134,12 @@ export async function POST(req: NextRequest) {
         signal: AbortSignal.timeout(15000),
       });
       const j = await r.json();
-      const url = j?.init_point || j?.initPoint;
+      const url = j?.initPoint || j?.init_point;
       if (url) mercadoPagoUrl = url;
+      if (j?.conversationId) {
+        crmConversationId = j.conversationId;
+        updateLeadCrmInfo(savedLead.id, j.conversationId);
+      }
     } catch (err) {
       console.error("Checkout n8n no disponible, uso link estático:", err);
     }
@@ -145,6 +151,7 @@ export async function POST(req: NextRequest) {
       calendarUrl: finalCalendarUrl,
       meetLink: finalMeetLink,
       icsUrl: `/api/calendar/ics?id=${savedLead.id}`,
+      crmConversationId,
     });
   } catch (error) {
     console.error("Error creating lead:", error);
