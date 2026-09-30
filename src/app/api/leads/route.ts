@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getLeads, addLead, updateLeadStatus, updateLeadCrmInfo, getProductById, getSiteContent } from "@/lib/db";
 import { calculateMeetingIsoDates, buildGoogleCalendarUrl, sendGoogleAppsScriptWebhook } from "@/lib/calendar";
-import { sendLeadToCrm } from "@/lib/crm";
 
 export async function GET() {
   try {
@@ -28,7 +27,7 @@ export async function POST(req: NextRequest) {
     const product = getProductById(productId);
     const productTitle = product ? product.name : "Servicio KORENS";
     const price = product ? product.offerPrice : 0;
-    const mercadoPagoUrl = product?.mercadoPagoUrl || "https://www.mercadopago.com.mx";
+    let mercadoPagoUrl = product?.mercadoPagoUrl || "https://www.mercadopago.com.mx";
 
     let startIso: string | undefined;
     let endIso: string | undefined;
@@ -111,27 +110,38 @@ export async function POST(req: NextRequest) {
       googleSynced: false,
     });
 
-    // Sincronización con el CRM (Chatwoot vía n8n): crea/actualiza el contacto
-    // y abre una conversación para que el asesor le dé seguimiento. Si el CRM
-    // no responde, el lead ya quedó guardado en la web y el checkout continúa.
+    // Flujo KORENS (n8n): crea la conversación en el CRM (Chatwoot) y un link de pago
+    // único de Mercado Pago con el precio oficial. Si n8n no responde, el lead ya quedó
+    // guardado y se usa el link estático del producto como respaldo.
     let crmConversationId: number | undefined;
     try {
-      const crmResult = await sendLeadToCrm({
-        name: savedLead.name,
-        email: savedLead.email,
-        whatsapp: savedLead.whatsapp,
-        productTitle: savedLead.productTitle,
-        price: savedLead.price,
-        source: "web-checkout",
-        leadId: savedLead.id,
-        notes: savedLead.notes,
+      const checkoutUrl =
+        process.env.N8N_CHECKOUT_URL ||
+        "https://korens-n8n-d4e981-95-111-239-97.sslip.io/webhook/korens-web-checkout";
+      const r = await fetch(checkoutUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          productId,
+          name: savedLead.name,
+          email: savedLead.email,
+          whatsapp: savedLead.whatsapp,
+          notes: savedLead.notes || "",
+          scheduledDate: scheduledDate || "",
+          scheduledTime: scheduledTime || "",
+          leadId: savedLead.id,
+        }),
+        signal: AbortSignal.timeout(15000),
       });
-      if (crmResult?.success && crmResult.conversationId) {
-        crmConversationId = crmResult.conversationId;
-        updateLeadCrmInfo(savedLead.id, crmResult.conversationId);
+      const j = await r.json();
+      const url = j?.initPoint || j?.init_point;
+      if (url) mercadoPagoUrl = url;
+      if (j?.conversationId) {
+        crmConversationId = j.conversationId;
+        updateLeadCrmInfo(savedLead.id, j.conversationId);
       }
     } catch (err) {
-      console.error("Error al sincronizar lead con el CRM:", err);
+      console.error("Checkout n8n no disponible, uso link estático:", err);
     }
 
     return NextResponse.json({
