@@ -29,6 +29,25 @@ function titleSize(t: string, big: boolean): number {
   return 72;
 }
 
+async function loadBg(url: string): Promise<string> {
+  if (!url) return "";
+  try {
+    const r = await fetch(url);
+    if (!r.ok) return "";
+    const ct = r.headers.get("content-type") || "image/jpeg";
+    if (ct.indexOf("image/") !== 0) return "";
+    const buf = new Uint8Array(await r.arrayBuffer());
+    if (buf.length > 4000000) return "";
+    let s = "";
+    for (let i = 0; i < buf.length; i += 0x8000) {
+      s += String.fromCharCode.apply(null, Array.from(buf.subarray(i, i + 0x8000)));
+    }
+    return "data:" + ct + ";base64," + btoa(s);
+  } catch (e) {
+    return "";
+  }
+}
+
 export async function GET(req: Request) {
   const { searchParams, origin } = new URL(req.url);
   const v = clean(searchParams.get("v"), 12) || "inner"; // cover | inner | oferta | producto | foto
@@ -39,7 +58,8 @@ export async function GET(req: Request) {
   const total = clean(searchParams.get("total"), 2);
   const precio = clean(searchParams.get("p"), 20);
   const bg = clean(searchParams.get("bg"), 400);
-  const bgOk = /^https:\/\/[a-z0-9.\-]+\//i.test(bg) ? bg : "";
+  const bgUrl = /^https:\/\/([a-z0-9-]+\.)*fal\.media\//i.test(bg) ? bg : "";
+  const bgOk = await loadBg(bgUrl);
 
   const [f700, f400, f800] = await Promise.all([
     fetch(FONT_BASE + "inter-latin-700-normal.woff").then((r) => r.arrayBuffer()),
@@ -202,7 +222,7 @@ export async function GET(req: Request) {
             top: 0,
             width: 1080,
             height: 1350,
-            background: bgOk ? "rgba(10,27,61,0.86)" : "linear-gradient(160deg, #12295A 0%, #0A1B3D 60%, #06122B 100%)",
+            background: bgOk ? "rgba(10,27,61,0.80)" : "linear-gradient(160deg, #12295A 0%, #0A1B3D 60%, #06122B 100%)",
           }}
         />
         <div style={{ display: "flex", flexDirection: "column", flex: 1, padding: "70px 70px 50px 70px" }}>
