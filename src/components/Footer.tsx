@@ -235,7 +235,7 @@ export default function Footer() {
           <p>© {new Date().getFullYear()} KORENS® Marca Registrada. Todos los derechos reservados.</p>
           <div className="flex items-center gap-6">
             <span className="hover:text-slate-300 cursor-pointer">Términos del Servicio</span>
-            <span className="hover:text-slate-300 cursor-pointer">Aviso de Privacidad</span>
+            <a href="/aviso-de-privacidad" className="hover:text-slate-300">Aviso de Privacidad</a>
             <span className="hover:text-slate-300 cursor-pointer">Garantía de Satisfacción</span>
           </div>
         </div>
