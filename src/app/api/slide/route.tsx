@@ -163,7 +163,7 @@ export async function GET(req: Request) {
           Diagnóstico por WhatsApp 56 5999 3957
         </div>
         <div style={{ display: "flex", justifyContent: "center", color: SILVER, fontSize: 34, fontWeight: 700 }}>
-          korens-oficial.vercel.app
+          www.korensmx.com
         </div>
       </div>
     );
