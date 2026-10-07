@@ -13,6 +13,7 @@ export default function BlogSection() {
   const [commentContent, setCommentContent] = useState("");
   const [submittingComment, setSubmittingComment] = useState(false);
   const [commentSuccess, setCommentSuccess] = useState(false);
+  const [showAll, setShowAll] = useState(false);
 
   useEffect(() => {
     fetchPosts();
@@ -24,6 +25,13 @@ export default function BlogSection() {
       const data = await res.json();
       if (data.success) {
         setPosts(data.posts);
+        // Enlace directo a un artículo: www.korensmx.com/?articulo=slug#blog
+        const slug = new URLSearchParams(window.location.search).get("articulo");
+        const linked = slug ? (data.posts as BlogPost[]).find((p) => p.slug === slug) : undefined;
+        if (linked) {
+          openPostModal(linked);
+          document.getElementById("blog")?.scrollIntoView();
+        }
       }
     } catch (e) {
       console.error(e);
@@ -92,7 +100,7 @@ export default function BlogSection() {
 
         {/* Grid de Artículos */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {posts.map((post) => (
+          {(showAll ? posts : posts.slice(0, 6)).map((post) => (
             <article
               key={post.id}
               onClick={() => openPostModal(post)}
@@ -145,6 +153,18 @@ export default function BlogSection() {
             </article>
           ))}
         </div>
+
+        {!showAll && posts.length > 6 && (
+          <div className="text-center mt-10">
+            <button
+              onClick={() => setShowAll(true)}
+              className="inline-flex items-center gap-2 text-sm font-semibold text-korens-orange border border-korens-orange/40 hover:bg-korens-orange/10 px-5 py-2.5 rounded-full transition-colors"
+            >
+              Ver todos los artículos
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Modal de Lectura de Artículo y Comentarios */}
@@ -190,7 +210,7 @@ export default function BlogSection() {
 
               {/* Contenido del Artículo */}
               <div className="text-sm sm:text-base text-slate-200 leading-relaxed space-y-4 whitespace-pre-line border-b border-slate-800 pb-8">
-                {selectedPost.content}
+                {renderContent(selectedPost.content)}
               </div>
 
               {/* ============================================================= */}
@@ -279,4 +299,21 @@ export default function BlogSection() {
       )}
     </section>
   );
+}
+
+// Muestra subtítulos (líneas que empiezan con ###) y quita los ** de negritas
+function renderContent(content: string) {
+  return content.split(/\n{2,}/).map((block, i) => {
+    const text = block.replace(/\*\*/g, "").trim();
+    if (text.startsWith("#")) {
+      const [first, ...rest] = text.split("\n");
+      return (
+        <div key={i} className="space-y-2">
+          <h3 className="text-lg font-bold text-white pt-2">{first.replace(/^#+\s*/, "")}</h3>
+          {rest.length > 0 && <p>{rest.join("\n")}</p>}
+        </div>
+      );
+    }
+    return <p key={i}>{text}</p>;
+  });
 }

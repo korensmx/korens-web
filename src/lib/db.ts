@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { Lead, Product, BlogPost, BlogComment, Review, SiteContent, DiagnosticSubmission } from "./types";
+import { getFileBlogPosts } from "./blogFiles";
 
 const DATA_DIR = path.join(process.cwd(), "data");
 const DB_FILE = path.join(DATA_DIR, "korens_db.json");
@@ -753,12 +754,13 @@ export function updateLeadCrmInfo(id: string, conversationId: number): Lead | nu
 
 export function getBlogPosts(): BlogPost[] {
   const db = ensureDb();
-  return db.blogPosts;
+  const filePosts = getFileBlogPosts();
+  const slugs = new Set(filePosts.map((p) => p.slug));
+  return [...filePosts, ...db.blogPosts.filter((p) => !slugs.has(p.slug))];
 }
 
 export function getBlogPostBySlug(slug: string): BlogPost | undefined {
-  const db = ensureDb();
-  return db.blogPosts.find((p) => p.slug === slug);
+  return getBlogPosts().find((p) => p.slug === slug);
 }
 
 export function saveBlogPost(postData: Omit<BlogPost, "id"> & { id?: string }): BlogPost {
