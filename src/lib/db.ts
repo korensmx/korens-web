@@ -23,7 +23,7 @@ const DEFAULT_DB: DatabaseSchema = {
     heroTitle: "Tu experiencia vale más cuando el mercado puede verla.",
     heroSubtitle: "Transformamos talento invisible en una propuesta profesional clara, competitiva y lista para abrir conversaciones con las empresas correctas.",
     whatsappNumber: "525659993957",
-    contactEmail: "contacto@korens.mx",
+    contactEmail: "contacto@korensmx.com",
     googleCalendarAccount: "korensmx@gmail.com",
     googleIntegration: {
       isLinked: true,

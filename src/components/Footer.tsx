@@ -211,7 +211,7 @@ export default function Footer() {
               </a>
               <div className="flex items-center gap-2">
                 <Mail className="w-3.5 h-3.5 text-korens-orange" />
-                <span>contacto@korens.mx</span>
+                <span>contacto@korensmx.com</span>
               </div>
               <div className="flex items-center gap-2">
                 <MapPin className="w-3.5 h-3.5 text-slate-500" />

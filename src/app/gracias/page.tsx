@@ -22,7 +22,7 @@ export default function Gracias({ searchParams }: { searchParams: { estado?: str
           <p>4. Cuando tu CV esté listo, te preguntaremos si deseas incluir una foto (nosotros no editamos fotografías).</p>
         </div>
         <a href="/" className="inline-block rounded-xl bg-orange-500 hover:bg-orange-400 text-white font-bold px-6 py-3">Volver al inicio</a>
-        <p className="text-xs text-slate-500">¿Dudas? Escríbenos a contacto@korens.com.mx</p>
+        <p className="text-xs text-slate-500">¿Dudas? Escríbenos a contacto@korensmx.com</p>
       </div>
     </main>
   );

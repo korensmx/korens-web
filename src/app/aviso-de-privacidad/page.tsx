@@ -11,7 +11,7 @@ export default function AvisoPrivacidad() {
         <h2 className="text-xl font-bold text-orange-400">¿Quién es el responsable?</h2>
         <p>
           KORENS, representada por Gerardo David Amador Segura, es responsable del tratamiento de tus datos personales.
-          Contacto: contacto@korens.com.mx
+          Contacto: contacto@korensmx.com
         </p>
 
         <h2 className="text-xl font-bold text-orange-400">¿Qué datos pedimos?</h2>
@@ -35,7 +35,7 @@ export default function AvisoPrivacidad() {
         <h2 className="text-xl font-bold text-orange-400">Tus derechos</h2>
         <p>
           Puedes acceder a tus datos, corregirlos, cancelarlos u oponerte a su uso (derechos ARCO) escribiendo a
-          contacto@korens.com.mx. También puedes darte de baja de los correos en cualquier momento con el enlace de
+          contacto@korensmx.com. También puedes darte de baja de los correos en cualquier momento con el enlace de
           baja que aparece al final de cada mensaje.
         </p>
 

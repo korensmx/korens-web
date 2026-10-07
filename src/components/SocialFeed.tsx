@@ -26,7 +26,7 @@ export default function SocialFeed() {
     {
       id: "v-Hqkf2tWTbbQ",
       youtubeId: "Hqkf2tWTbbQ",
-      title: "¡Destaca y consiguie empleo! 🚀 Conoce KORENS 💼✨ korens.com.mx",
+      title: "¡Destaca y consiguie empleo! 🚀 Conoce KORENS 💼✨ www.korensmx.com",
       description: "Descubre cómo en KORENS® reestructuramos tu perfil profesional y CV para ayudarte a conseguir el empleo y compensación que mereces.",
       views: "¡Recién Subido!",
       duration: "Short",

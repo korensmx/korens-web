@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "KORENS® | Consultoría Estratégica de Carrera",
     description: "Tu experiencia vale más cuando el mercado puede verla. Posicionamiento profesional de alta empleabilidad.",
-    url: "https://korens.mx",
+    url: "https://www.korensmx.com",
     siteName: "KORENS®",
     locale: "es_MX",
     type: "website",
