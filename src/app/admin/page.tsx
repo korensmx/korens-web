@@ -912,9 +912,6 @@ export default function AdminDashboardPage() {
                 />
                 <Lock className="w-4 h-4 text-slate-500 absolute right-3.5 top-3.5" />
               </div>
-              <p className="text-[11px] text-slate-500 mt-1">
-                Clave por defecto: <code className="text-slate-400">korens2025</code>
-              </p>
             </div>
 
             <button

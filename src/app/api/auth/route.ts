@@ -13,7 +13,9 @@ export async function POST(req: NextRequest) {
       if (!verifyAdminPassword(password)) {
         return NextResponse.json({ success: false, error: "Contraseña actual incorrecta" }, { status: 401 });
       }
-      updateAdminPassword(newPassword);
+      if (!updateAdminPassword(newPassword)) {
+        return NextResponse.json({ success: false, error: "La contraseña se cambia desde la configuración del servidor" }, { status: 501 });
+      }
       return NextResponse.json({ success: true, message: "Contraseña actualizada exitosamente" });
     }
 

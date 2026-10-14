@@ -1,4 +1,5 @@
 import fs from "fs";
+import crypto from "crypto";
 import path from "path";
 import { Lead, Product, BlogPost, BlogComment, Review, SiteContent, DiagnosticSubmission } from "./types";
 import { getFileBlogPosts } from "./blogFiles";
@@ -18,7 +19,7 @@ interface DatabaseSchema {
 }
 
 const DEFAULT_DB: DatabaseSchema = {
-  adminPasswordHash: "korens2025",
+  adminPasswordHash: "",
   siteContent: {
     heroTitle: "Tu experiencia vale más cuando el mercado puede verla.",
     heroSubtitle: "Transformamos talento invisible en una propuesta profesional clara, competitiva y lista para abrir conversaciones con las empresas correctas.",
@@ -899,14 +900,21 @@ export function updateDiagnosticCrmInfo(id: string, conversationId: number): Dia
   return diag;
 }
 
+// Contraseña del panel /admin guardada como hash scrypt ("sal:hash"), nunca en texto plano.
+// En Vercel se puede reemplazar con la variable de entorno ADMIN_PASSWORD_HASH.
+const DEFAULT_ADMIN_PASSWORD_HASH =
+  "a0e8f3739a4a5aff29a4c8222f60be97:2a26610027122e3957d1193d8379fddd374fbc88f4d282d0c13526e1656817900a82b7992272e5109b276051eac07e018e7577e4565f7eafdf0deaef288bb3a1";
+
 export function verifyAdminPassword(pass: string): boolean {
-  const db = ensureDb();
-  return pass === db.adminPasswordHash || pass === "korens2025" || pass === "admin123";
+  const stored = process.env.ADMIN_PASSWORD_HASH || DEFAULT_ADMIN_PASSWORD_HASH;
+  const [salt, hash] = stored.split(":");
+  if (!salt || !hash) return false;
+  const expected = Buffer.from(hash, "hex");
+  const actual = crypto.scryptSync(pass, salt, expected.length);
+  return crypto.timingSafeEqual(actual, expected);
 }
 
-export function updateAdminPassword(newPass: string): boolean {
-  const db = ensureDb();
-  db.adminPasswordHash = newPass;
-  writeDb(db);
-  return true;
+export function updateAdminPassword(_newPass: string): boolean {
+  // El disco de Vercel es de solo lectura: el cambio se hace en el código o en ADMIN_PASSWORD_HASH.
+  return false;
 }
