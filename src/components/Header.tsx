@@ -3,7 +3,9 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Menu, X, ArrowRight, ShieldCheck, Lock } from "lucide-react";
+import { Menu, X, ArrowRight, Lock } from "lucide-react";
+import { useSeasonalTheme } from "@/components/seasonal/useSeasonalTheme";
+import PapelPicadoBanner from "@/components/seasonal/PapelPicadoBanner";
 
 interface HeaderProps {
   onOpenDiagnostic: () => void;
@@ -12,6 +14,7 @@ interface HeaderProps {
 export default function Header({ onOpenDiagnostic }: HeaderProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { isActive: isSeasonal } = useSeasonalTheme();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -33,14 +36,18 @@ export default function Header({ onOpenDiagnostic }: HeaderProps) {
 
   return (
     <>
-      {/* Barra superior de anuncio de temporada */}
-      <div className="bg-gradient-to-r from-korens-navy-deep via-korens-navy to-korens-navy-deep border-b border-slate-800/60 py-1.5 px-4 text-xs text-center text-slate-300 font-medium">
-        <span className="inline-flex items-center gap-2">
-          <span className="flex h-2 w-2 rounded-full bg-korens-orange animate-ping" />
-          <span className="text-korens-orange font-semibold">Ofertas de Aceleración 2026:</span>
-          <span>Hasta 50% de descuento en paquetes ejecutivos. Plazas limitadas por mes.</span>
-        </span>
-      </div>
+      {/* Barra superior: Papel Picado de temporada (hasta 3 nov) o normal (después del 3 nov) */}
+      {isSeasonal ? (
+        <PapelPicadoBanner />
+      ) : (
+        <div className="bg-gradient-to-r from-korens-navy-deep via-korens-navy to-korens-navy-deep border-b border-slate-800/60 py-1.5 px-4 text-xs text-center text-slate-300 font-medium">
+          <span className="inline-flex items-center gap-2">
+            <span className="flex h-2 w-2 rounded-full bg-korens-orange animate-ping" />
+            <span className="text-korens-orange font-semibold">Ofertas de Aceleración 2026:</span>
+            <span>Hasta 50% de descuento en paquetes ejecutivos. Plazas limitadas por mes.</span>
+          </span>
+        </div>
+      )}
 
       {/* Sticky Header Principal */}
       <header

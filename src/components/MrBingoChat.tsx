@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { MessageCircle, X, Send, Sparkles, ShieldCheck } from "lucide-react";
+import { useSeasonalTheme } from "@/components/seasonal/useSeasonalTheme";
 
 declare global {
   interface Window {
@@ -31,6 +32,7 @@ export default function MrBingoChat() {
   const [accepts, setAccepts] = useState(true);
   const [error, setError] = useState("");
   const [showTooltip, setShowTooltip] = useState(false);
+  const { isActive: isSeasonal } = useSeasonalTheme();
 
   useEffect(() => {
     const timer = setTimeout(() => setShowTooltip(true), 6000);
@@ -85,8 +87,6 @@ export default function MrBingoChat() {
   };
 
   const handleProbarDemo = () => {
-    // El "demo" ahora abre al Mr. Bingo real (Chatwoot + n8n + Gemini),
-    // no una simulación aparte, tal como se acordó con el equipo del CRM.
     runWhenReady(() => window.$chatwoot?.toggle("open"));
     setOpen(false);
   };
@@ -102,7 +102,10 @@ export default function MrBingoChat() {
               <Image src="/assets/bingo/mrbingo.png" alt="Mr. Bingo, asesor de empleabilidad de KORENS" fill className="object-cover" />
             </div>
             <div className="min-w-0">
-              <p className="text-white font-bold text-sm leading-tight">Mr. Bingo</p>
+              <p className="text-white font-bold text-sm leading-tight flex items-center gap-1.5">
+                <span>Mr. Bingo</span>
+                {isSeasonal && <span className="text-xs" title="Modo Día de Muertos">🏵️</span>}
+              </p>
               <p className="text-[11px] text-korens-orange font-semibold flex items-center gap-1">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
                 Asesor de empleabilidad KORENS
@@ -193,7 +196,11 @@ export default function MrBingoChat() {
       {!open && showTooltip && (
         <div className="hidden sm:flex items-center gap-2 bg-slate-900/95 text-white border border-slate-700/80 px-4 py-2.5 rounded-2xl shadow-2xl backdrop-blur-md animate-in fade-in slide-in-from-right-3 duration-300 max-w-[220px]">
           <Sparkles className="w-4 h-4 text-korens-orange shrink-0" />
-          <span className="text-[11px] text-slate-200">Mr. Bingo puede ayudarte a diagnosticar tu perfil, ¡pregúntale!</span>
+          <span className="text-[11px] text-slate-200">
+            {isSeasonal
+              ? "🏵️ ¡Hola! Mr. Bingo en edición de temporada. ¿Revisamos tu CV?"
+              : "Mr. Bingo puede ayudarte a diagnosticar tu perfil, ¡pregúntale!"}
+          </span>
           <button
             onClick={() => setShowTooltip(false)}
             className="text-slate-400 hover:text-white p-0.5 rounded-md ml-1 shrink-0"
@@ -219,6 +226,11 @@ export default function MrBingoChat() {
             <MessageCircle className="w-6 h-6 text-white" />
           )}
         </span>
+        {isSeasonal && (
+          <span className="absolute -top-2.5 -right-1 text-sm select-none pointer-events-none z-10 filter drop-shadow">
+            🎩
+          </span>
+        )}
       </button>
       <span className="sr-only">{ready ? "Chat listo" : "Cargando chat"}</span>
     </aside>

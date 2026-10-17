@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { CheckCircle2, ArrowRight, Sparkles, TrendingUp, Award, Users, ChevronRight, Compass, Quote } from "lucide-react";
+import { useSeasonalTheme } from "@/components/seasonal/useSeasonalTheme";
 
 interface HeroProps {
   onSelectPackageTarget?: () => void;
@@ -11,6 +12,7 @@ interface HeroProps {
 
 export default function Hero({ onSelectPackageTarget, onOpenDiagnostic }: HeroProps) {
   const [activePillar, setActivePillar] = useState<number>(0);
+  const { isActive: isSeasonal } = useSeasonalTheme();
 
   const pillars = [
     {
@@ -51,6 +53,11 @@ export default function Hero({ onSelectPackageTarget, onOpenDiagnostic }: HeroPr
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-korens-orange/10 rounded-full blur-[140px] pointer-events-none" />
       <div className="absolute top-1/3 right-10 w-[400px] h-[400px] bg-korens-navy-accent/20 rounded-full blur-[120px] pointer-events-none" />
 
+      {/* Resplandor cálido de temporada */}
+      {isSeasonal && (
+        <div className="absolute top-16 left-1/3 -translate-x-1/2 w-[500px] h-[500px] bg-amber-500/10 rounded-full blur-[160px] pointer-events-none animate-pulse" />
+      )}
+
       {/* Foto profesional decorativa (solo pantallas grandes) */}
       <div className="hidden xl:block absolute top-24 right-8 w-[280px] z-10">
         <div className="relative rounded-2xl overflow-hidden border border-korens-orange/30 shadow-glowOrange glass-panel">
@@ -77,7 +84,11 @@ export default function Hero({ onSelectPackageTarget, onOpenDiagnostic }: HeroPr
           {/* Badge superior */}
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-900/80 border border-korens-orange/30 text-korens-orange text-xs sm:text-sm font-semibold shadow-glowOrangeSubtle backdrop-blur-md">
             <Sparkles className="w-3.5 h-3.5 animate-pulse" />
-            <span>Consultoría Estratégica de Carrera & Alta Empleabilidad</span>
+            <span>
+              {isSeasonal
+                ? "💀 Edición Especial • Renacimiento Profesional & Empleabilidad 🎃"
+                : "Consultoría Estratégica de Carrera & Alta Empleabilidad"}
+            </span>
           </div>
 
           {/* Titular de Alto Impacto */}
